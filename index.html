@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>My first three.js app</title>
+  <style>
+    body {
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container" style="width:512px; height:512px; margin:auto;">
+
+  </div>
+  <script src="js/three.js"></script>
+  <script>
+
+    let container = document.getElementById("container");
+    
+    // Following: https://mofu-dev.com/en/blog/stable-fluids/
+    // Resolution
+    // Smaller as it will be very heavy depending on specs
+    const resolution = 0.25;
+    const width = Math.round(container.offsetWidth * resolution);
+    const height = Math.round(container.offsetHeight * resolution);
+
+    // (length of 1 cell) / (overall length)
+    const cellScale = new THREE.Vector2(1 / width, 1 / height);
+    
+    // Vertext
+    // Size eclusing edges
+    const planeG = new THREE.PlaneGeometry(
+      2 - cellScale.x * 2,
+      2 - cellScale.y * 2
+    )
+    
+    // Number in pixels in the fbo
+    const fboSize = new THREE.Vector2(
+      width, 
+      height
+    );
+
+    const fbos = {
+      // The Pressure of the acoustic computation
+      pressure_0: null,
+      pressure_1: null,
+      pressure_2: null,
+      
+      // Laplacian
+      laplacianP: null
+    }
+
+    for (let key in fbos) {
+      fbos[key] = new THREE.WebGLRenderTarget(
+        fboSize.x, 
+        fboSize.y,
+        {
+          type: THREE.FloatType
+        }
+      )
+    }
+    
+    
+    
+    
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(container.offsetWidth, container.offsetHeight);
+    // Lower resolution version
+    // renderer.setSize(window.innerWidth / 2, window.innerHeight / 2, false);
+    container.appendChild(renderer.domElement);
+
+    const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+    const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+    const cube = new THREE.Mesh( geometry, material );
+    scene.add( cube );
+
+    camera.position.z = 5;
+
+    function animate() {
+      requestAnimationFrame( animate );
+      renderer.render( scene, camera );
+      cube.rotation.x += 0.01;
+      cube.rotation.y += 0.01;
+    }
+    animate();
+  </script>
+</body>
+
+</html>
