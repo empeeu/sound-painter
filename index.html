@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>My first three.js app</title>
+  <title>FDTD Acoustic Simulation app</title>
   <style>
     body {
       margin: 0;
@@ -17,79 +17,82 @@
   </div>
   <script src="js/three.js"></script>
   <script>
+// useful : https://github.com/PavelDoGreat/WebGL-Fluid-Simulation/blob/master/script.js
 
+
+  </script>
+
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script> -->
+  <script src="https://threejs.org/examples/js/controls/TrackballControls.js"></script>
+
+  <script>
     let container = document.getElementById("container");
-    
-    // Following: https://mofu-dev.com/en/blog/stable-fluids/
-    // Resolution
-    // Smaller as it will be very heavy depending on specs
-    const resolution = 0.25;
-    const width = Math.round(container.offsetWidth * resolution);
-    const height = Math.round(container.offsetHeight * resolution);
 
-    // (length of 1 cell) / (overall length)
-    const cellScale = new THREE.Vector2(1 / width, 1 / height);
-    
-    // Vertext
-    // Size eclusing edges
-    const planeG = new THREE.PlaneGeometry(
-      2 - cellScale.x * 2,
-      2 - cellScale.y * 2
-    )
-    
-    // Number in pixels in the fbo
-    const fboSize = new THREE.Vector2(
-      width, 
-      height
-    );
+    //@author Omar Shehata. 2015.
+    //We are loading the Three.js library from the cdn here: https://cdnjs.com/libraries/three.js/
+    // Great Resource: https://gamedevelopment.tutsplus.com/tutorials/quick-tip-how-to-render-to-a-texture-in-threejs--cms-25686
 
-    const fbos = {
-      // The Pressure of the acoustic computation
-      pressure_0: null,
-      pressure_1: null,
-      pressure_2: null,
-      
-      // Laplacian
-      laplacianP: null
-    }
 
-    for (let key in fbos) {
-      fbos[key] = new THREE.WebGLRenderTarget(
-        fboSize.x, 
-        fboSize.y,
-        {
-          type: THREE.FloatType
-        }
-      )
-    }
-    
-    
-    
-    
+    ///////////////////This is the basic scene setup
+    var scene = new THREE.Scene();
+    var width = container.offsetWidth;
+    var height = container.offsetHeight;
+    var camera = new THREE.PerspectiveCamera(70, width / height, 1, 1000);
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-    const renderer = new THREE.WebGLRenderer();
-    renderer.setSize(container.offsetWidth, container.offsetHeight);
-    // Lower resolution version
-    // renderer.setSize(window.innerWidth / 2, window.innerHeight / 2, false);
+    var renderer = new THREE.WebGLRenderer();
+    renderer.setSize(width, height);
     container.appendChild(renderer.domElement);
 
-    const geometry = new THREE.BoxGeometry( 1, 1, 1 );
-    const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-    const cube = new THREE.Mesh( geometry, material );
-    scene.add( cube );
+    ///////////////////This is where we create our off-screen render target
+    //Create a different scene to hold our buffer objects
+    var bufferScene = new THREE.Scene();
+    //Create the texture that will store our result
+    var bufferTexture = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter });
 
-    camera.position.z = 5;
+    //Let's create a red box
+    var redMaterial = new THREE.MeshBasicMaterial({ color: 0xF06565 });
+    var boxGeometry = new THREE.BoxGeometry(5, 5, 5);
+    var boxObject = new THREE.Mesh(boxGeometry, redMaterial);
+    boxObject.position.z = -10;
+    bufferScene.add(boxObject);//We add it to the bufferScene instead of the normal scene!
 
-    function animate() {
-      requestAnimationFrame( animate );
-      renderer.render( scene, camera );
-      cube.rotation.x += 0.01;
-      cube.rotation.y += 0.01;
+    ///And a blue plane behind it
+    var blueMaterial = new THREE.MeshBasicMaterial({ color: 0x7074FF })
+    var plane = new THREE.PlaneGeometry(window.innerWidth, window.innerHeight);
+    var planeObject = new THREE.Mesh(plane, blueMaterial);
+    planeObject.position.z = -15;
+    bufferScene.add(planeObject);//We add it to the bufferScene instead of the normal scene!
+
+    ////////////////////////////Now we use our bufferTexture as a material to render it onto our main scene
+    var boxMaterial = new THREE.MeshBasicMaterial({ map: bufferTexture.texture });
+    var boxGeometry2 = new THREE.BoxGeometry(5, 5, 5);
+    var mainBoxObject = new THREE.Mesh(boxGeometry2, boxMaterial);
+    mainBoxObject.position.z = -10;
+    scene.add(mainBoxObject);
+
+    //Render everything!
+    function render() {
+
+      requestAnimationFrame(render);
+
+      //Make the box rotate on box axises
+      boxObject.rotation.y += 0.01;
+      boxObject.rotation.x += 0.01;
+      //Rotate the main box too
+      mainBoxObject.rotation.y += 0.01;
+      mainBoxObject.rotation.x += 0.01;
+
+      //Render onto our off screen texture
+      renderer.setRenderTarget(bufferTexture);
+      renderer.render(bufferScene, camera);
+
+      //Finally, draw to the screen
+      renderer.setRenderTarget(null);
+      renderer.render(scene, camera);
+
     }
-    animate();
+    render();
+
   </script>
 </body>
 
