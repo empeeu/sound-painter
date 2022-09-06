@@ -27,15 +27,14 @@
   <script id="fragmentShader" type="x-shader/x-fragment">
     varying vec2 vUv;
     uniform float time;
-    uniform sampler2D pressureTexture0;
+    uniform sampler2D p0I;
+    uniform sampler2D p1I;
     uniform vec2 source;
     void main()	{
-      float p0 = texture2D(pressureTexture0, vUv).x;
+      float p0 = texture2D(p0I, vUv).x;
+      float p1 = texture2D(p1I, vUv).x;
       float d = length(vUv.xy - source);
-      //gl_FragColor = vec4(vUv.y, vUv.x, 0, 1.0 );
-      gl_FragColor = vec4(p0, d, float(d < 0.1) * 1.0, 1.0 );
-      gl_FragColor = vec4(p0, p0, float(d < 0.1) * d / 0.1, 1.0 );
-
+      gl_FragColor = vec4(d + p0 + p1, 0, 0, 0);
     }
   </script>
   <script>
@@ -77,43 +76,39 @@
     //Create a different scene to hold our buffer objects
     var bufferScene = new THREE.Scene();
     //Create the texture that will store our result
+
+    // TODO; Look into https://threejs.org/docs/api/en/renderers/WebGLArrayRenderTarget.html
+    // If the stuff below turns out not to work
     var pressureTexture0 = new THREE.WebGLRenderTarget(
       width, height, {
         minFilter: THREE.LinearFilter,
         magFilter: THREE.NearestFilter, 
-        type: THREE.FloatType
+        type: THREE.FloatType,
+        format: THREE.RedFormat
     });
     var pressureTexture1 = new THREE.WebGLRenderTarget(
       width, height, {
         minFilter: THREE.LinearFilter,
         magFilter: THREE.NearestFilter, 
-        type: THREE.FloatType
+        type: THREE.FloatType,
+        format: THREE.RedFormat
+
     });
     var pressureTexture2 = new THREE.WebGLRenderTarget(
       width, height, {
         minFilter: THREE.LinearFilter,
         magFilter: THREE.NearestFilter, 
-        type: THREE.FloatType
+        type: THREE.FloatType,
+        format: THREE.RedFormat
     });
-    // Might have to initialize everything with an initial texture
-
-    // renderer.setTexture2D(pressureTexture0, 0);
-    // renderer.setTexture2D(pressureTexture1, 0);
-    // renderer.setTexture2D(pressureTexture2, 0);
-    //Let's create a red box
-    // var redMaterial = new THREE.MeshBasicMaterial({ color: 0xF06565 });
-    // var boxGeometry = new THREE.BoxGeometry(5, 5, 5);
-    // var boxObject = new THREE.Mesh(boxGeometry, redMaterial);
-    // boxObject.position.z = -10;
-    // bufferScene.add(boxObject);//We add it to the bufferScene instead of the normal scene!
 
     var source = new THREE.Vector2(0.5, 0.5);
 
     ///And a plane behind it
     uniforms = {
 					time: { value: 0.0 },
-          p0: {value: pressureTexture0},
-          p1: {value: pressureTexture1},
+          p0I: {value: pressureTexture0},
+          p1I: {value: pressureTexture1},
           source: {value: source}
 				};
     var planeMaterial = new THREE.ShaderMaterial({
@@ -143,10 +138,7 @@
       // },1000/25);
 
       
-      //Make the box rotate on box axises
-      // boxObject.rotation.y += 0.01;
-      // boxObject.rotation.x += 0.01;
-      // //Rotate the main box too
+      //Make the plane rotate on plane axes
       // mainPlaneObject.rotation.z += 0.02;
       // mainPlaneObject.rotation.x += 0.01;  
 
