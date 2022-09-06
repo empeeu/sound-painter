@@ -37,6 +37,15 @@
       gl_FragColor = vec4(d + p0 + p1, 0, 0, 0);
     }
   </script>
+  <script id="fragmentShader2" type="x-shader/x-fragment">
+    varying vec2 vUv;
+    uniform sampler2D pI;
+    void main()	{
+      float p = texture2D(pI, vUv).x;
+      //gl_FragColor = vec4(p, p*p, sin(p * 50.0), 1.0);
+      gl_FragColor = vec4(p, p, p, 1.0);
+    }
+  </script>
   <script>
     // reverences: https://gamedevelopment.tutsplus.com/tutorials/quick-tip-how-to-render-to-a-texture-in-threejs--cms-25686  -- The GOOD one
     // useful : https://github.com/PavelDoGreat/WebGL-Fluid-Simulation/blob/master/script.js
@@ -125,9 +134,17 @@
 
 
     ////////////////////////////Now we use our pressureTexture0 as a material to render it onto our main scene
-    var planeMaterial = new THREE.MeshBasicMaterial({ map: pressureTexture2.texture });
+    uniforms2 = {
+          pI: {value: pressureTexture2.texture},
+				};
+    var planeMaterial2 = new THREE.ShaderMaterial({
+      uniforms: uniforms2,
+      vertexShader: document.getElementById('vertexShader').textContent,
+      fragmentShader: document.getElementById('fragmentShader2').textContent
+
+    });    
     var plane2 = new THREE.PlaneGeometry(width, height);
-    var mainPlaneObject = new THREE.Mesh(plane2, planeMaterial);
+    var mainPlaneObject = new THREE.Mesh(plane2, planeMaterial2);
     mainPlaneObject.position.z = 0;
     scene.add(mainPlaneObject);
 
