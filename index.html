@@ -12,7 +12,7 @@
 </head>
 
 <body>
-  <div id="container" style="width:512px; height:256px; margin:auto;">
+  <div id="container" style="width:512px; height:512px; margin:auto;">
 
   </div>
   <script src="js/three.js"></script>
@@ -26,6 +26,7 @@
   </script>
   <script id="fragmentShader" type="x-shader/x-fragment">
     /*
+    Main equation on the interior
     d^2(p)/dt^2 = c^2 nabla^2 (p)
 
     [p(t+1) - 2p(t) + p(t-1)] / dt^2 = c^2 [p(x+1) - 2p(x) + p(x-1)] / dx^2 
@@ -34,6 +35,15 @@
     p(t+1) = 2p(t) - p(t-1) + dt^2c^2 [p(x+1) - 2p(x) + p(x-1)] / dx^2 
                             + dt^2c^2 [p(y+1) - 2p(y) + p(y-1)] / dy^2 
 
+    Open Boundary Conditions:
+    dp/dt = +- c dp/dn
+    p(t + 1) = p(t) +-c dt /dn (p(n) - p(n-1))
+    * or rearranging using a "ghost" node (outside the texture)
+    p(n-1) = p(n) +-dn / (cdt) (p(t+1) - p(t)) 
+
+    Damping / Absorption: (always make the change in pressure smaller)
+    dp/dt = \alpha dt/dt  // Really? no negative sign?
+    dp2/dt2 = \alpha dp/dt
     */
     varying vec2 vUv;
     uniform float time;
@@ -55,6 +65,29 @@
       float p1s = texture2D(p1I, vUv - offset * vec2(0, pxpy.y)).x;
       float d = length(vUv.xy - source.xy);
 
+      float edgeAlpha = 0.0;
+      float edgeAlphaVal = 0.1/dt;
+
+      // Handle Boundary conditions
+      float onEdge;
+      offset = 1.0;
+      // East-West edges
+      onEdge = float(vUv.x <= pxpy.x * offset);
+      edgeAlpha += onEdge * edgeAlphaVal;
+      p1w = p1w * (1.0 - onEdge) + onEdge * (p1 - dxdy.x / c / dt * (p1 - p0));
+      onEdge = float(vUv.x >= (1.0 - pxpy.x * offset));
+      edgeAlpha += onEdge * edgeAlphaVal;
+      p1e = p1e * (1.0 - onEdge) + onEdge * (p1 - dxdy.x / c / dt * (p1 - p0));
+
+      // North-South edges
+      onEdge = float(vUv.y <= pxpy.y * offset);
+      edgeAlpha += onEdge * edgeAlphaVal;
+      p1s = p1s * (1.0 - onEdge) + onEdge * (p1 - dxdy.y / c / dt * (p1 - p0));
+      onEdge = float(vUv.y >= (1.0 - pxpy.y * offset));
+      edgeAlpha += onEdge * edgeAlphaVal;
+      p1n = p1n * (1.0 - onEdge) + onEdge * (p1 - dxdy.y / c / dt * (p1 - p0));
+
+
       float dt2 = dt * dt;
       float dt2c2 = dt2 * c * c;
 
@@ -62,9 +95,10 @@
       float xParts = (p1e - 2.0 * p1 + p1w) / (dxdy.x * dxdy.x);
       float yParts = (p1n - 2.0 * p1 + p1s) / (dxdy.y * dxdy.y);
       float sourceParts = float(d < (length(dxdy) * 1.0)) * source.z * cos(2.0 * 3.14159 * time * source.w);
+      float absorption = dt * (p1 - p0) * edgeAlpha;
 
       //gl_FragColor = vec4(timeParts + (xParts + yParts) + sourceParts, 0, 0, 0);
-      gl_FragColor = vec4(timeParts + dt2c2 * (xParts + yParts) + sourceParts, 0, 0, 0);
+      gl_FragColor = vec4(timeParts + dt2c2 * (xParts + yParts) + sourceParts + absorption, 0, 0, 0);
     }
   </script>
   <script id="fragmentShader2" type="x-shader/x-fragment">
@@ -156,7 +190,7 @@
     var pxpy = new THREE.Vector2(1 / widthDomain, 1 / heightDomain); 
 
     var c = 1.0;  // speed of sound
-    var dt = 1 / Math.sqrt(2) * Math.min(dxdy.x, dxdy.y) / c;
+    var dt = 0.95 / Math.sqrt(2) * Math.min(dxdy.x, dxdy.y) / c;
 
     ///Create the uniforms for the computations
     uniforms = {
