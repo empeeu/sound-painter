@@ -13,9 +13,10 @@
 
 <body>
   <div id="container" style="width:512px; height:512px; margin:auto;">
-    <span>FPS: <label id="FPS"></label></span> 
-
+    
   </div>
+  <div><button id="Start" onclick="startStopRender();">Start</button></div> 
+  <div>FPS: <label id="FPS"></label></div> 
   <script src="js/three.js"></script>
 
   <script id="vertexShader" type="x-shader/x-vertex">
@@ -174,8 +175,8 @@
     //Create a different scene to hold our buffer objects
     var bufferScene = new THREE.Scene();
     //Create the textures that will store our results and intermediate
-    var widthDomain = 256;
-    var heightDomain = 256;
+    var widthDomain = 256*4;
+    var heightDomain = 256*4;
 
     var pressureTexture0 = new THREE.WebGLRenderTarget(
       widthDomain, heightDomain, {
@@ -204,7 +205,7 @@
     
     // Now create the supporing data
     // initial pressure source
-    var source = new THREE.Vector4(0.5, 0.5, 16, 8);
+    var source = new THREE.Vector4(0.5, 0.5, 64, 16);
 
     // discretization. We assume the domain has a maximum dimension of 1
     // and then the other dimension depends on the aspect ratio
@@ -262,13 +263,17 @@
     var mainPlaneObject = new THREE.Mesh(plane2, planeMaterial2);
     mainPlaneObject.position.z = 0;
     scene.add(mainPlaneObject);
-
+    
     //Render everything!
-    var i = 0;
+    var simTime = 0;
     var startTime = 0;
     var fpsOutput = document.getElementById("FPS");
     var fps = 0;
+    var i = 0;
     function render() {
+      if (!doRunSim){
+        return;
+      }
       setTimeout(function(){
         requestAnimationFrame(render);
       },Math.max(0, 1000 / 30 - (Date.now() - startTime)));
@@ -276,24 +281,41 @@
       //mainPlaneObject.rotation.z += 0.02;
       //mainPlaneObject.rotation.x += 0.01;
       fps = 0.9 * fps + 0.05 * (1000 / (Date.now() - startTime));
-      fpsOutput.innerText = Math.round(fps);
+      fpsOutput.innerText = Math.round(fps) + ' TIME: ' + Math.round(simTime * 100) / 100;
       startTime = Date.now();
       //Render onto our off screen texture
-      renderer.setRenderTarget(textureRing[2]);
-      renderer.render(bufferScene, camera);
+      for (var j=0; j< 4; j++){
+        simTime += dt;
+        renderer.setRenderTarget(textureRing[2]);
+        renderer.render(bufferScene, camera);
+        uniforms.time.value = uniforms.time.value + dt;
+        textureRing = [textureRing[1], textureRing[2], textureRing[0]];
+        uniforms.p0I.value = textureRing[0].texture;
+        uniforms.p1I.value = textureRing[1].texture;
+        uniforms.source.value.x = 0.5 * (Math.cos(2 * 3.14159 * simTime / 2) + 1);
+      }
 
       //Finally, draw to the screen
       uniforms2.pI.value = textureRing[2].texture;
       renderer.setRenderTarget(null);
       renderer.render(scene, camera);
-      uniforms.time.value = uniforms.time.value + dt;
       i += 1;
-      textureRing = [textureRing[1], textureRing[2], textureRing[0]];
-      uniforms.p0I.value = textureRing[0].texture;
-      uniforms.p1I.value = textureRing[1].texture;
 
     }
-    render();
+    // render();
+    var doRunSim = false;
+    function startStopRender(){
+      var button = document.getElementById("Start");
+      if (doRunSim){
+        // Already running, stop it
+        button.innerText = "Start"
+        doRunSim = false;
+      } else {
+        doRunSim = true;
+        button.innerText = "Stop"
+        render();
+      }
+    }
 
   </script>
 </body>
