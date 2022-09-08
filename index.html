@@ -13,6 +13,7 @@
 
 <body>
   <div id="container" style="width:512px; height:512px; margin:auto;">
+    <span>FPS: <label id="FPS"></label></span> 
 
   </div>
   <script src="js/three.js"></script>
@@ -42,6 +43,12 @@
     p(n-1) = p(n) +-dn / (cdt) (p(t+1) - p(t)) 
 
     Damping / Absorption: (always make the change in pressure smaller)
+    p = \alpha / t
+    dp / dt = -\alpha / t^2
+    d2p / dt2 = alpha / t^3 == alpha p^3
+
+    or 
+
     dp/dt = \alpha dt/dt  // Really? no negative sign?
     dp2/dt2 = \alpha dp/dt
     */
@@ -56,6 +63,11 @@
     uniform float c;
     uniform float dt;
     void main()	{
+      // A few constants
+      float dt2 = dt * dt;
+      float dt2c2 = dt2 * c * c;
+
+      // Get the texture values
       float p0 = texture2D(p0I, vUv).x;
       float p1 = texture2D(p1I, vUv).x;
       float offset = 1.0;
@@ -66,39 +78,57 @@
       float d = length(vUv.xy - source.xy);
 
       float edgeAlpha = 0.0;
-      float edgeAlphaVal = 0.1/dt;
+      float edgeAlphaVal = 0.04/dt;
 
       // Handle Boundary conditions
+      float onCorner;
+      vec2 cornerOffset;
       float onEdge;
       offset = 1.0;
       // East-West edges
       onEdge = float(vUv.x <= pxpy.x * offset);
+      cornerOffset.x = -offset * pxpy.x * onEdge;
+      onCorner += onEdge;
       edgeAlpha += onEdge * edgeAlphaVal;
       p1w = p1w * (1.0 - onEdge) + onEdge * (p1 - dxdy.x / c / dt * (p1 - p0));
       onEdge = float(vUv.x >= (1.0 - pxpy.x * offset));
+      cornerOffset.x = offset * pxpy.x * onEdge;
+      onCorner += onEdge;
       edgeAlpha += onEdge * edgeAlphaVal;
       p1e = p1e * (1.0 - onEdge) + onEdge * (p1 - dxdy.x / c / dt * (p1 - p0));
 
       // North-South edges
       onEdge = float(vUv.y <= pxpy.y * offset);
+      cornerOffset.y = -offset * pxpy.y * onEdge;
+      onCorner += onEdge;
       edgeAlpha += onEdge * edgeAlphaVal;
       p1s = p1s * (1.0 - onEdge) + onEdge * (p1 - dxdy.y / c / dt * (p1 - p0));
       onEdge = float(vUv.y >= (1.0 - pxpy.y * offset));
+      cornerOffset.y = offset * pxpy.y * onEdge;
+      onCorner += onEdge;
       edgeAlpha += onEdge * edgeAlphaVal;
       p1n = p1n * (1.0 - onEdge) + onEdge * (p1 - dxdy.y / c / dt * (p1 - p0));
 
-
-      float dt2 = dt * dt;
-      float dt2c2 = dt2 * c * c;
+      float xParts, yParts;
+      float dn;
+      if (onCorner >= 2.0){
+        dn = length(dxdy);
+        p1n = texture2D(p1I, vUv - cornerOffset).x;
+        p1s = p1 - dn / c / dt * (p1 - p0);
+        xParts = 0.0;
+        yParts = (p1n - 2.0 * p1 + p1s) / (dn * dn);
+      } else {
+        xParts = (p1e - 2.0 * p1 + p1w) / (dxdy.x * dxdy.x);
+        yParts = (p1n - 2.0 * p1 + p1s) / (dxdy.y * dxdy.y);
+      }
 
       float timeParts = 2.0 * p1 - p0;
-      float xParts = (p1e - 2.0 * p1 + p1w) / (dxdy.x * dxdy.x);
-      float yParts = (p1n - 2.0 * p1 + p1s) / (dxdy.y * dxdy.y);
-      float sourceParts = float(d < (length(dxdy) * 1.0)) * source.z * cos(2.0 * 3.14159 * time * source.w);
-      float absorption = dt * (p1 - p0) * edgeAlpha;
+      float sourceParts = dt2 * float(d < (length(dxdy) * 1.0)) * source.z * source.w * source.w * 39.47841 * cos(6.283185 * time * source.w);
+      float absorp = dt * edgeAlpha * (p1 - p0);
+      float p = timeParts + dt2c2 * (xParts + yParts) + sourceParts + absorp;
 
       //gl_FragColor = vec4(timeParts + (xParts + yParts) + sourceParts, 0, 0, 0);
-      gl_FragColor = vec4(timeParts + dt2c2 * (xParts + yParts) + sourceParts + absorption, 0, 0, 0);
+      gl_FragColor = vec4(p, 0, 0, 0);
     }
   </script>
   <script id="fragmentShader2" type="x-shader/x-fragment">
@@ -174,7 +204,7 @@
     
     // Now create the supporing data
     // initial pressure source
-    var source = new THREE.Vector4(0.5, 0.5, 0.1, 30);
+    var source = new THREE.Vector4(0.5, 0.5, 16, 8);
 
     // discretization. We assume the domain has a maximum dimension of 1
     // and then the other dimension depends on the aspect ratio
@@ -235,16 +265,19 @@
 
     //Render everything!
     var i = 0;
+    var startTime = 0;
+    var fpsOutput = document.getElementById("FPS");
+    var fps = 0;
     function render() {
       setTimeout(function(){
-         requestAnimationFrame(render);
-      },1000/25);
-
-
+        requestAnimationFrame(render);
+      },Math.max(0, 1000 / 30 - (Date.now() - startTime)));
       //Make the plane rotate on plane axes
       //mainPlaneObject.rotation.z += 0.02;
       //mainPlaneObject.rotation.x += 0.01;
-
+      fps = 0.9 * fps + 0.05 * (1000 / (Date.now() - startTime));
+      fpsOutput.innerText = Math.round(fps);
+      startTime = Date.now();
       //Render onto our off screen texture
       renderer.setRenderTarget(textureRing[2]);
       renderer.render(bufferScene, camera);
