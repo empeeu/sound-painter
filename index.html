@@ -292,7 +292,8 @@
         textureRing = [textureRing[1], textureRing[2], textureRing[0]];
         uniforms.p0I.value = textureRing[0].texture;
         uniforms.p1I.value = textureRing[1].texture;
-        uniforms.source.value.x = 0.5 * (Math.cos(2 * 3.14159 * simTime / 2) + 1);
+        uniforms.source.value.x = 0.4 * (Math.cos(2 * 3.14159 * simTime / 2)) + 0.5;
+        uniforms.source.value.y = 0.4 * (Math.sin(2 * 3.14159 * simTime / 2)) + 0.5;
       }
 
       //Finally, draw to the screen
@@ -316,6 +317,7 @@
         render();
       }
     }
+    startStopRender();
 
   </script>
 </body>
