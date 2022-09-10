@@ -8,15 +8,31 @@
     body {
       margin: 0;
     }
+
+    #canvas-container {
+      position: fixed;
+      top: 0px;
+      width: 100%;
+    }
+
+    #drawing-canvas {
+      position: absolute;
+      margin-left: auto;
+      margin-right: auto;
+      left: 0px;
+      right: 0px;
+    }
   </style>
 </head>
 
 <body>
-  <div id="container" style="width:512px; height:512px; margin:auto;">
-    
+  <div id="canvas-container">
+    <canvas id="drawing-canvas" height="512px" width="512px"></canvas>
   </div>
-  <div><button id="Start" onclick="startStopRender();">Start</button></div> 
-  <div>FPS: <label id="FPS"></label></div> 
+  <div id="container" style="width:512px; height:512px; margin:auto;">
+  </div>
+  <div><button id="Start" onclick="startStopRender();">Start</button></div>
+  <div><input id="set-draw-color" type="color" onchange="setDrawColor();"> FPS: <label id="FPS"></label></div>
   <script src="js/three.js"></script>
 
   <script id="vertexShader" type="x-shader/x-vertex">
@@ -63,6 +79,8 @@
     uniform vec2 domain;
     uniform float c;
     uniform float dt;
+    uniform sampler2D walls;
+
     void main()	{
       // A few constants
       float dt2 = dt * dt;
@@ -76,6 +94,12 @@
       float p1w = texture2D(p1I, vUv - offset * vec2(pxpy.x, 0)).x;
       float p1n = texture2D(p1I, vUv + offset * vec2(0, pxpy.y)).x;
       float p1s = texture2D(p1I, vUv - offset * vec2(0, pxpy.y)).x;
+     
+      vec4 wall1e = texture2D(walls, vUv + offset * vec2(pxpy.x, 0));
+      vec4 wall1w = texture2D(walls, vUv - offset * vec2(pxpy.x, 0));
+      vec4 wall1n = texture2D(walls, vUv + offset * vec2(0, pxpy.y));
+      vec4 wall1s = texture2D(walls, vUv - offset * vec2(0, pxpy.y));
+
       float d = length(vUv.xy - source.xy);
 
       float edgeAlpha = 0.0;
@@ -109,7 +133,27 @@
       onCorner += onEdge;
       edgeAlpha += onEdge * edgeAlphaVal;
       p1n = p1n * (1.0 - onEdge) + onEdge * (p1 - dxdy.y / c / dt * (p1 - p0));
+      
+      ///////// Apply wall boundary conditions
+      // Rigid wall
+      p1n = p1n * (1.0 - float(wall1n.w > 0.99) * float(wall1n.x < 0.01));
+      p1s = p1s * (1.0 - float(wall1s.w > 0.99) * float(wall1s.x < 0.01));
+      p1w = p1w * (1.0 - float(wall1w.w > 0.99) * float(wall1w.x < 0.01));
+      p1e = p1e * (1.0 - float(wall1e.w > 0.99) * float(wall1e.x < 0.01));
 
+      // Pressure-release wall
+      float isPRWall;
+      isPRWall = float(wall1n.w > 0.99) * float(wall1n.x > 0.99);
+      p1n = p1n * (1.0 - isPRWall) + p1 * isPRWall;
+      isPRWall = float(wall1s.w > 0.99) * float(wall1s.x > 0.99);
+      p1s = p1s * (1.0 - isPRWall) + p1 * isPRWall;
+      isPRWall = float(wall1w.w > 0.99) * float(wall1w.x > 0.99);
+      p1w = p1w * (1.0 - isPRWall) + p1 * isPRWall;
+      isPRWall = float(wall1e.w > 0.99) * float(wall1e.x > 0.99);
+      p1e = p1e * (1.0 - isPRWall) + p1 * isPRWall;
+
+
+      // Compute the integration of pressures
       float xParts, yParts;
       float dn;
       if (onCorner >= 2.0){
@@ -128,37 +172,107 @@
       float absorp = dt * edgeAlpha * (p1 - p0);
       float p = timeParts + dt2c2 * (xParts + yParts) + sourceParts + absorp;
 
-      //gl_FragColor = vec4(timeParts + (xParts + yParts) + sourceParts, 0, 0, 0);
       gl_FragColor = vec4(p, 0, 0, 0);
     }
   </script>
   <script id="fragmentShader2" type="x-shader/x-fragment">
-    varying vec2 vUv;
-    uniform sampler2D pI;
-    void main()	{
-      float p = texture2D(pI, vUv).x;
-      //gl_FragColor = vec4(p, p*p, sin(p * 50.0), 1.0);
-      gl_FragColor = vec4(p / 2.0 + 0.5, p / 2.0 + 0.5, p / 2.0 + 0.5, 1.0);
-    }
-  </script>
+      varying vec2 vUv;
+      uniform sampler2D pI;
+      void main()	{
+        float p = texture2D(pI, vUv).x;
+        //gl_FragColor = vec4(p, p*p, sin(p * 50.0), 1.0);
+        gl_FragColor = vec4(p / 2.0 + 0.5, p / 2.0 + 0.5, p / 2.0 + 0.5, 1.0);
+      }
+    </script>
   <script>
-    // reverences: https://gamedevelopment.tutsplus.com/tutorials/quick-tip-how-to-render-to-a-texture-in-threejs--cms-25686  -- The GOOD one
-    // useful : https://github.com/PavelDoGreat/WebGL-Fluid-Simulation/blob/master/script.js
-    // https://paveldogreat.github.io/WebGL-Fluid-Simulation/
-    // https://stackoverflow.com/questions/21533757/three-js-use-framebuffer-as-texture#comment32726524_21651562
-    // https://github.com/mrdoob/three.js/blob/master/examples/webgl_framebuffer_texture.html
-    // https://29a.ch/2012/12/16/webgl-fluid-simulation
-    // https://mofu-dev.com/en/blog/stable-fluids
+      // reverences: https://gamedevelopment.tutsplus.com/tutorials/quick-tip-how-to-render-to-a-texture-in-threejs--cms-25686  -- The GOOD one
+      // useful : https://github.com/PavelDoGreat/WebGL-Fluid-Simulation/blob/master/script.js
+      // https://paveldogreat.github.io/WebGL-Fluid-Simulation/
+      // https://stackoverflow.com/questions/21533757/three-js-use-framebuffer-as-texture#comment32726524_21651562
+      // https://github.com/mrdoob/three.js/blob/master/examples/webgl_framebuffer_texture.html
+      // https://29a.ch/2012/12/16/webgl-fluid-simulation
+      // https://mofu-dev.com/en/blog/stable-fluids
 
 
   </script>
-
+  
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script> -->
   <script src="https://threejs.org/examples/js/controls/TrackballControls.js"></script>
+  
+  <script>
+    function setupCanvasDrawing() {
+      const drawingCanvas = document.getElementById('drawing-canvas');
+      const drawingContext = drawingCanvas.getContext('2d');
+
+      // draw gray transparent background
+
+      // drawingContext.fillStyle = '#FFFFFFFF';
+      // drawingContext.fillRect( 504, 504, 8, 8 );
+
+      var drawingTexture = new THREE.CanvasTexture(drawingCanvas);
+
+      var paint = false;
+
+      drawingCanvas.addEventListener('pointerdown', function (e) {
+
+        paint = true;
+        drawingContext.beginPath();
+        drawStartPos.set(e.offsetX, e.offsetY);
+
+      });
+
+      drawingCanvas.addEventListener('pointermove', function (e) {
+
+        if (paint) draw(drawingContext, e.offsetX, e.offsetY);
+
+      });
+
+      drawingCanvas.addEventListener('pointerup', function () {
+
+        paint = false;
+
+      });
+
+      drawingCanvas.addEventListener('pointerleave', function () {
+
+        paint = false;
+
+      });
+
+      return drawingTexture;
+
+    }
+    function draw(drawContext, x, y) {
+
+      drawContext.moveTo(drawStartPos.x, drawStartPos.y);
+      drawContext.strokeStyle = drawColor;
+      drawContext.lineWidth = 1;
+      drawContext.lineTo(x, y);
+      drawContext.stroke();
+      // reset drawing start position to current position.
+      drawStartPos.set(x, y);
+      // need to flag the map as needing updating.
+      // material.map.needsUpdate = true;
+      drawingTexture.needsUpdate = true;
+
+    }
+
+    function setDrawColor(){
+      drawColor = document.getElementById("set-draw-color").value;
+    }
+  </script>
 
   <script>
     // This is the HTML element that houses the threejs canvas
-    let container = document.getElementById("container");
+    var container = document.getElementById("container");
+
+    /////////////////// This is for our Drawing CANVAS
+    const drawStartPos = new THREE.Vector2();
+    var drawColor = "#00000000";
+    setDrawColor();
+
+    var drawingTexture = setupCanvasDrawing();
+
 
     ///////////////////This is the basic scene setup
     var scene = new THREE.Scene();
@@ -167,7 +281,7 @@
     var camera = new THREE.OrthographicCamera(- widthContainer / 2, widthContainer / 2, heightContainer / 2, - heightContainer / 2, -1000, 1000);
     camera.position.z = 10;
 
-    var renderer = new THREE.WebGLRenderer();
+    var renderer = new THREE.WebGLRenderer( { antialias: true });
     renderer.setSize(widthContainer, heightContainer);
     container.appendChild(renderer.domElement);
 
@@ -175,8 +289,8 @@
     //Create a different scene to hold our buffer objects
     var bufferScene = new THREE.Scene();
     //Create the textures that will store our results and intermediate
-    var widthDomain = 256*4;
-    var heightDomain = 256*4;
+    var widthDomain = widthContainer;
+    var heightDomain = heightContainer;
 
     var pressureTexture0 = new THREE.WebGLRenderTarget(
       widthDomain, heightDomain, {
@@ -202,14 +316,14 @@
     });
 
     var textureRing = [pressureTexture0, pressureTexture1, pressureTexture2];
-    
+
     // Now create the supporing data
     // initial pressure source
-    var source = new THREE.Vector4(0.5, 0.5, 64, 16);
+    var source = new THREE.Vector4(0.5, 0.5, 1, 64);
 
     // discretization. We assume the domain has a maximum dimension of 1
     // and then the other dimension depends on the aspect ratio
-    if (widthContainer < heightContainer){
+    if (widthContainer < heightContainer) {
       var domainSizeWorld = new THREE.Vector2(1 * widthContainer / heightContainer, 1);
     } else {
       var domainSizeWorld = new THREE.Vector2(1, 1 * heightContainer / widthContainer);
@@ -218,7 +332,7 @@
 
     // The u-v coordinates can be finer / coarser than the dxdy of the computational domain. 
     // so, we need a conversion between the two
-    var pxpy = new THREE.Vector2(1 / widthDomain, 1 / heightDomain); 
+    var pxpy = new THREE.Vector2(1 / widthDomain, 1 / heightDomain);
 
     var c = 1.0;  // speed of sound
     var dt = 0.95 / Math.sqrt(2) * Math.min(dxdy.x, dxdy.y) / c;
@@ -226,14 +340,16 @@
     ///Create the uniforms for the computations
     uniforms = {
       time: { value: 0.0 },
-      p0I: { value: pressureTexture0 },
-      p1I: { value: pressureTexture1 },
+      p0I: { type: "t", value: pressureTexture0.texture },
+      p1I: { type: "t", value: pressureTexture1.texture },
       source: { value: source },
-      dxdy: { value : dxdy },
-      pxpy: { value : pxpy },
-      domain: { value : domainSizeWorld },
-      c: { value : c },
-      dt: { value : dt }
+      dxdy: { value: dxdy },
+      pxpy: { value: pxpy },
+      domain: { value: domainSizeWorld },
+      c: { value: c },
+      dt: { value: dt },
+      walls: { type: "t", 
+               value: drawingTexture }
     };
     /// This is the material that houses the custom shader that does the computation
     var planeMaterial = new THREE.ShaderMaterial({
@@ -263,7 +379,7 @@
     var mainPlaneObject = new THREE.Mesh(plane2, planeMaterial2);
     mainPlaneObject.position.z = 0;
     scene.add(mainPlaneObject);
-    
+
     //Render everything!
     var simTime = 0;
     var startTime = 0;
@@ -271,12 +387,12 @@
     var fps = 0;
     var i = 0;
     function render() {
-      if (!doRunSim){
+      if (!doRunSim) {
         return;
       }
-      setTimeout(function(){
+      setTimeout(function () {
         requestAnimationFrame(render);
-      },Math.max(0, 1000 / 30 - (Date.now() - startTime)));
+      }, Math.max(0, 1000 / 30 - (Date.now() - startTime)));
       //Make the plane rotate on plane axes
       //mainPlaneObject.rotation.z += 0.02;
       //mainPlaneObject.rotation.x += 0.01;
@@ -284,7 +400,7 @@
       fpsOutput.innerText = Math.round(fps) + ' TIME: ' + Math.round(simTime * 100) / 100;
       startTime = Date.now();
       //Render onto our off screen texture
-      for (var j=0; j< 4; j++){
+      for (var j = 0; j < 1; j++) {
         simTime += dt;
         renderer.setRenderTarget(textureRing[2]);
         renderer.render(bufferScene, camera);
@@ -292,8 +408,7 @@
         textureRing = [textureRing[1], textureRing[2], textureRing[0]];
         uniforms.p0I.value = textureRing[0].texture;
         uniforms.p1I.value = textureRing[1].texture;
-        uniforms.source.value.x = 0.4 * (Math.cos(2 * 3.14159 * simTime / 2)) + 0.5;
-        uniforms.source.value.y = 0.4 * (Math.sin(2 * 3.14159 * simTime / 2)) + 0.5;
+        uniforms.walls.value = drawingTexture;
       }
 
       //Finally, draw to the screen
@@ -302,12 +417,16 @@
       renderer.render(scene, camera);
       i += 1;
 
+      // TO READ pixels off a float texture, the texture needs to be in RGBA format
+      // renderer.readRenderTargetPixels(pressureTexture0, 64, 64, 1, 1, buff);
+      // https://r105.threejsfundamentals.org/threejs/lessons/threejs-indexed-textures.html
+
     }
     // render();
     var doRunSim = false;
-    function startStopRender(){
+    function startStopRender() {
       var button = document.getElementById("Start");
-      if (doRunSim){
+      if (doRunSim) {
         // Already running, stop it
         button.innerText = "Start"
         doRunSim = false;
