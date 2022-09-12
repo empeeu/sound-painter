@@ -131,6 +131,10 @@
     <input onchange="updateDrawColor();" id="phase-select" type="range" min=0.05 max=1 step=0.01 value=0.5 />
   </div>
   <div>
+    <label>Absorption Coefficient: </label><input onchange="uniforms.absorpCoeff.value=this.value;" type="range" min=0 max=0.1 step=0.001 value=0 />
+  </div>
+
+  <div>
     <button id="Start" onclick="startStopRender();">Start</button>
     <label> Draw Line-Width<input id="draw-line-width" type=number min=1 max=50 value=2 onchange="drawWidth=parseInt(this.value);">
     <label> Draw Free-Hand</label><input type="checkbox" id="free-hand-draw" checked /></div>
@@ -190,6 +194,7 @@
     uniform sampler2D walls;
     uniform float textSourceAmp;
     uniform float textSourceFreq;
+    uniform float absorpCoeff;
 
     vec3 HSVtoRGB(in vec3 HSV)
     {
@@ -217,6 +222,7 @@
       // A few constants
       float dt2 = dt * dt;
       float dt2c2 = dt2 * c * c;
+      float dz = length(dxdy);
 
       // Get the texture values
       float p0 = texture2D(p0I, vUv).x;
@@ -266,6 +272,9 @@
       onCorner += onEdge;
       edgeAlpha += onEdge * edgeAlphaVal;
       p1n = p1n * (1.0 - onEdge) + onEdge * (p1 - dxdy.y / c / dt * (p1 - p0));
+
+      // Up down "edges"
+      float p1up = (p1 - dz / c / dt * (p1 - p0));
       
       ///////// Apply wall boundary conditions
       // Rigid wall
@@ -287,7 +296,7 @@
 
 
       // Compute the integration of pressures
-      float xParts, yParts;
+      float xParts, yParts, zParts;
       float dn;
       if (onCorner >= 2.0){
         dn = length(dxdy);
@@ -306,8 +315,8 @@
       
       f = textSourceFreq * wall.x;
       sourceParts += textSourceAmp * dt2 * float(wall.y > 0.05) * wall.y * f * f * 39.47841 * cos(6.283185 * (time * f + wall.z));
-      float absorp = dt * edgeAlpha * (p1 - p0);
-      float p = timeParts + dt2c2 * (xParts + yParts) + sourceParts + absorp;
+      float absorp = dt * edgeAlpha * (p1 - p0) + absorpCoeff * dt2c2 * (p1up - p1) / (dz * dz);
+      float p = timeParts + dt2c2 * (xParts + yParts + zParts) + sourceParts + absorp;
 
       gl_FragColor = vec4(p, 0, 0, 0);
     }
@@ -612,7 +621,8 @@
         value: drawingTexture
       },
       textSourceAmp: {value: 1},
-      textSourceFreq: { value: widthDomain / 4}
+      textSourceFreq: { value: widthDomain / 4},
+      absorpCoeff: { value : 0.0}
     };
     /// This is the material that houses the custom shader that does the computation
     var planeMaterial = new THREE.ShaderMaterial({
