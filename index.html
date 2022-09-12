@@ -225,19 +225,20 @@
       float dz = length(dxdy);
 
       // Get the texture values
-      float p0 = texture2D(p0I, vUv).x;
-      float p1 = texture2D(p1I, vUv).x;
+      vec4 p0 = texture2D(p0I, vUv);
+      vec4 p1 = texture2D(p1I, vUv);
       float offset = 1.0;
-      float p1e = texture2D(p1I, vUv + offset * vec2(pxpy.x, 0)).x;
-      float p1w = texture2D(p1I, vUv - offset * vec2(pxpy.x, 0)).x;
-      float p1n = texture2D(p1I, vUv + offset * vec2(0, pxpy.y)).x;
-      float p1s = texture2D(p1I, vUv - offset * vec2(0, pxpy.y)).x;
+      vec4 p1e = texture2D(p1I, vUv + offset * vec2(pxpy.x, 0));
+      vec4 p1w = texture2D(p1I, vUv - offset * vec2(pxpy.x, 0));
+      vec4 p1n = texture2D(p1I, vUv + offset * vec2(0, pxpy.y));
+      vec4 p1s = texture2D(p1I, vUv - offset * vec2(0, pxpy.y));
      
       vec4 wall1e = texture2D(walls, vUv + offset * vec2(pxpy.x, 0));
       vec4 wall1w = texture2D(walls, vUv - offset * vec2(pxpy.x, 0));
       vec4 wall1n = texture2D(walls, vUv + offset * vec2(0, pxpy.y));
       vec4 wall1s = texture2D(walls, vUv - offset * vec2(0, pxpy.y));
-      vec3 wall = RGBtoHSV(texture2D(walls, vUv).xyz);
+      vec3 wallRGB = texture2D(walls, vUv).xyz;
+      vec3 wall = RGBtoHSV(wallRGB);
 
       float d = length(vUv.xy - source.xy);
 
@@ -274,7 +275,7 @@
       p1n = p1n * (1.0 - onEdge) + onEdge * (p1 - dxdy.y / c / dt * (p1 - p0));
 
       // Up down "edges"
-      float p1up = (p1 - dz / c / dt * (p1 - p0));
+      vec4 p1up = (p1 - dz / c / dt * (p1 - p0));
       
       ///////// Apply wall boundary conditions
       // Rigid wall
@@ -296,38 +297,40 @@
 
 
       // Compute the integration of pressures
-      float xParts, yParts, zParts;
+      vec4 xParts, yParts, zParts;
       float dn;
       if (onCorner >= 2.0){
         dn = length(dxdy);
-        p1n = texture2D(p1I, vUv - cornerOffset).x;
+        p1n = texture2D(p1I, vUv - cornerOffset);
         p1s = p1 - dn / c / dt * (p1 - p0);
-        xParts = 0.0;
+        xParts = vec4(0.0,0.0,0.0,0.0);
         yParts = (p1n - 2.0 * p1 + p1s) / (dn * dn);
       } else {
         xParts = (p1e - 2.0 * p1 + p1w) / (dxdy.x * dxdy.x);
         yParts = (p1n - 2.0 * p1 + p1s) / (dxdy.y * dxdy.y);
       }
 
-      float timeParts = 2.0 * p1 - p0;
+      vec4 timeParts = 2.0 * p1 - p0;
       float f = textSourceFreq * source.w;
-      float sourceParts = textSourceAmp * dt2 * float(d < (length(dxdy) * 1.0)) * source.z * f * f * 39.47841 * cos(6.283185 * time * f);
+      float mouseSourceParts = textSourceAmp * dt2 * float(d < (length(dxdy) * 1.0)) * source.z * f * f * 39.47841 * cos(6.283185 * time * f);
+      // use the transparency to keep track of the amplitude
+      vec4 sourceParts = vec4(mouseSourceParts, mouseSourceParts, mouseSourceParts, source.z);
       
       f = textSourceFreq * wall.x;
-      sourceParts += textSourceAmp * dt2 * float(wall.y > 0.05) * wall.y * f * f * 39.47841 * cos(6.283185 * (time * f + wall.z));
-      float absorp = dt * edgeAlpha * (p1 - p0) + absorpCoeff * dt2c2 * (p1up - p1) / (dz * dz);
-      float p = timeParts + dt2c2 * (xParts + yParts + zParts) + sourceParts + absorp;
+      sourceParts += vec4(wallRGB * textSourceAmp * dt2 * float(wall.y > 0.05) * f * f * 39.47841 * cos(6.283185 * (time * f + wall.z)), wall.y);
+      vec4 absorp = dt * edgeAlpha * (p1 - p0) + absorpCoeff * dt2c2 * (p1up - p1) / (dz * dz);
+      vec4 p = timeParts + dt2c2 * (xParts + yParts + zParts) + sourceParts + absorp;
 
-      gl_FragColor = vec4(p, 0, 0, 0);
+      gl_FragColor = p;
     }
   </script>
   <script id="fragmentShader2" type="x-shader/x-fragment">
       varying vec2 vUv;
       uniform sampler2D pI;
       void main()	{
-        float p = texture2D(pI, vUv).x;
+        vec4 p = texture2D(pI, vUv);
         //gl_FragColor = vec4(p, p*p, sin(p * 50.0), 1.0);
-        gl_FragColor = vec4(p / 2.0 + 0.5, p / 2.0 + 0.5, p / 2.0 + 0.5, 1.0);
+        gl_FragColor = vec4(p.x / 2.0 + 0.5, p.y / 2.0 + 0.5, p.z / 2.0 + 0.5, 1.0);
       }
   </script>
   <script id="fragmentShader3" type="x-shader/x-fragment">
@@ -553,14 +556,14 @@
       minFilter: THREE.LinearFilter,
       magFilter: THREE.NearestFilter,
       type: THREE.FloatType,
-      format: THREE.RedFormat
+      // format: THREE.RedFormat
     });
     var pressureTexture1 = new THREE.WebGLRenderTarget(
       widthDomain, heightDomain, {
       minFilter: THREE.LinearFilter,
       magFilter: THREE.NearestFilter,
       type: THREE.FloatType,
-      format: THREE.RedFormat
+      // format: THREE.RedFormat
 
     });
     var pressureTexture2 = new THREE.WebGLRenderTarget(
@@ -568,7 +571,7 @@
       minFilter: THREE.LinearFilter,
       magFilter: THREE.NearestFilter,
       type: THREE.FloatType,
-      format: THREE.RedFormat
+      // format: THREE.RedFormat
     });
 
     var textureRing = [pressureTexture0, pressureTexture1, pressureTexture2];
