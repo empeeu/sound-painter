@@ -131,6 +131,7 @@
     <button id="draw-wall" onclick="setDrawColor('#000000ff', 1);">Wall</button>
     <button id="draw-free-surface" onclick="setDrawColor('#ffffffff', 1);">Free-Surface</button>
     <button id="draw-erase" onclick="eraseColor();">Erase</button>
+    <button id="pressure-erase" onclick="pressureErase();">Erase Pressure Field</button>
     <button id="test-sound" onclick="mouseTestSound();">Turn Mouse Test Source ON</button>
      FPS: <label id="FPS"></label></div>
   <script src="js/three.js"></script>
@@ -312,7 +313,12 @@
         //gl_FragColor = vec4(p, p*p, sin(p * 50.0), 1.0);
         gl_FragColor = vec4(p / 2.0 + 0.5, p / 2.0 + 0.5, p / 2.0 + 0.5, 1.0);
       }
-    </script>
+  </script>
+  <script id="fragmentShader3" type="x-shader/x-fragment">
+    void main()	{
+      gl_FragColor = vec4(0.0, 0.0, 0.0, 0);
+    }
+  </script>
   <script>
       // reverences: https://gamedevelopment.tutsplus.com/tutorials/quick-tip-how-to-render-to-a-texture-in-threejs--cms-25686  -- The GOOD one
       // useful : https://github.com/PavelDoGreat/WebGL-Fluid-Simulation/blob/master/script.js
@@ -414,6 +420,15 @@
       drawingContext.globalCompositeOperation = "destination-out"; 
     }
 
+    function pressureErase(){
+      renderer.setRenderTarget(textureRing[0]);
+      renderer.render(bufferScene, camera);
+      renderer.setRenderTarget(textureRing[1]);
+      renderer.render(bufferScene, camera);
+      renderer.setRenderTarget(textureRing[2]);
+      renderer.render(bufferScene, camera);
+    }
+
     function str_pad_left(string, pad, length) {
     // Pads the number with zeros to look nice for the timer display
     // string: string
@@ -509,6 +524,7 @@
 
     ///////////////////This is where we create our off-screen render target
     //Create a different scene to hold our buffer objects
+    var initScene = new THREE.Scene();
     var bufferScene = new THREE.Scene();
     //Create the textures that will store our results and intermediate
     var widthDomain = widthContainer;
@@ -538,6 +554,18 @@
     });
 
     var textureRing = [pressureTexture0, pressureTexture1, pressureTexture2];
+
+    // Create an initialization shader 
+    var initMaterial = new THREE.ShaderMaterial({
+      vertexShader: document.getElementById('vertexShader').textContent,
+      fragmentShader: document.getElementById('fragmentShader3').textContent
+    });
+        // var planeMaterial = new THREE.MeshBasicMaterial({ color: 0x7074FF });
+    /// We attach this shader to a plane and add it to our buffer scne
+    var initPlane = new THREE.PlaneGeometry(widthContainer, heightContainer);
+    var initPlaneObject = new THREE.Mesh(initPlane, initMaterial);
+    initPlaneObject.position.z = 0;
+    initScene.add(initPlaneObject);//We add it to the bufferScene instead of the normal scene!
 
     // Now create the supporing data
     // initial pressure source
