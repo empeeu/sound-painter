@@ -131,6 +131,7 @@
     <button id="draw-wall" onclick="setDrawColor('#000000ff', 1);">Wall</button>
     <button id="draw-free-surface" onclick="setDrawColor('#ffffffff', 1);">Free-Surface</button>
     <button id="draw-erase" onclick="eraseColor();">Erase</button>
+    <button id="test-sound" onclick="mouseTestSound();">Turn Mouse Test Source ON</button>
      FPS: <label id="FPS"></label></div>
   <script src="js/three.js"></script>
 
@@ -292,8 +293,10 @@
       }
 
       float timeParts = 2.0 * p1 - p0;
-      float sourceParts = dt2 * float(d < (length(dxdy) * 1.0)) * source.z * source.w * source.w * 39.47841 * cos(6.283185 * time * source.w);
-      float f = textSourceFreq * wall.x;
+      float f = textSourceFreq * source.w;
+      float sourceParts = textSourceAmp * dt2 * float(d < (length(dxdy) * 1.0)) * source.z * f * f * 39.47841 * cos(6.283185 * time * f);
+      
+      f = textSourceFreq * wall.x;
       sourceParts += textSourceAmp * dt2 * float(wall.y > 0.05) * wall.y * f * f * 39.47841 * cos(6.283185 * (time * f + wall.z));
       float absorp = dt * edgeAlpha * (p1 - p0);
       float p = timeParts + dt2c2 * (xParts + yParts) + sourceParts + absorp;
@@ -338,23 +341,36 @@
       var drawingTexture = new THREE.CanvasTexture(drawingCanvas);
 
       var paint = false;
+      var mouseSourceIsOn = false;
 
       drawingCanvas.addEventListener('pointerdown', function (e) {
 
-        paint = true;
-        drawingContext.beginPath();
-        drawStartPos.set(e.offsetX, e.offsetY);
-
+        paint = true & !mouseSource;
+        mouseSourceIsOn = mouseSource;
+        if (paint){
+          drawingContext.beginPath();
+          drawStartPos.set(e.offsetX, e.offsetY);
+        }
+        if (mouseSource) {
+          source.z = parseFloat(document.getElementById('amplitude-select').value);
+          source.w = parseFloat(document.getElementById('frequency-select').value);
+        }
       });
 
       drawingCanvas.addEventListener('pointermove', function (e) {
 
         if (paint) draw(drawingContext, e.offsetX, e.offsetY);
+        if (mouseSource) {
+          source.x = e.offsetX / widthContainer;
+          source.y = (heightContainer - e.offsetY) / heightContainer;
+          uniforms.source.value = source;
+        }
 
       });
 
       drawingCanvas.addEventListener('pointerup', function (e) {
-        draw(drawingContext, e.offsetX, e.offsetY);
+        if (paint) draw(drawingContext, e.offsetX, e.offsetY);
+        if (mouseSource) source.z = 0
         paint = false;
 
       });
@@ -453,6 +469,16 @@
 
       setDrawColor(rgb, 1);
     }
+
+    function mouseTestSound(){
+      if (mouseSource){
+        mouseSource = false;
+        document.getElementById("test-sound").innerText = "Turn Mouse Test Source ON"
+      } else {
+        mouseSource = true;
+        document.getElementById("test-sound").innerText = "Turn Mouse Test Source OFF"
+      }
+    }
   </script>
 
   <script>
@@ -465,6 +491,7 @@
     var drawWidth = 1;
     var drawingContext;
     var drawingTexture = setupCanvasDrawing();
+    var mouseSource = false;
     updateDrawColor();
 
 
