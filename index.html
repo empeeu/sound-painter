@@ -11,6 +11,7 @@
 
     :root {
       --amp-track-color: 'white';
+      --phase-track-color: 'white';
     }
 
     #canvas-container {
@@ -106,15 +107,12 @@
     }
     
     #phase-select::-moz-range-track {
-      background: linear-gradient(to right, #000000, #ffffff);
+      background: var(--phase-track-color);
       height: 5px;
       border-style: solid;
       border-width: 1px;
     }
   </style>
-  <script>
-    let frequncyColorRamp = JSON.parse('[212, 198, 195, 198, 196, 195, 194, 194, 193, 195, 194, 194, 194, 193, 193, 194, 194, 193, 193, 193, 193, 193, 193, 193, 193, 193, 193, 193, 193, 194, 194, 194, 194, 194, 194, 194, 194, 194, 193, 194, 194, 194, 193, 193, 193, 193, 193, 193, 193, 193, 193, 193, 193, 193, 193, 193, 193, 193, 193, 193, 193, 192, 193, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 191, 192, 191, 191, 191, 191, 191, 191, 191, 191, 191, 191, 191, 191, 191, 191, 191, 191, 191, 191, 191, 191, 191, 190, 191, 191, 191, 190, 190, 190, 190, 190, 190, 189, 189, 189, 189, 189, 189, 188, 188, 188, 188, 188, 188, 188, 188, 188, 187, 187, 187, 187, 187, 187, 187, 187, 186, 186, 186, 186, 186, 186, 186, 186, 186, 186, 185, 185, 185, 185, 185, 185, 185, 185, 185, 184, 184, 184, 184, 184, 184, 184, 184, 183, 183, 183, 183, 183, 183, 183, 182, 182, 182, 182, 182, 181, 181, 181, 181, 181, 181, 180, 180, 180, 180, 180, 180, 180, 179, 179, 179, 179, 179, 179, 179, 179, 178, 178, 178, 178, 178, 177, 177, 177, 177, 177, 177, 177, 177, 176, 176, 176, 176, 175, 175, 175, 174, 174, 174, 174, 173, 173, 173, 172, 172, 172, 172, 171, 171, 170, 170, 170, 170, 169, 169, 168, 168, 168, 168, 167, 167, 167, 167, 166, 166, 166, 165, 165, 165, 164, 164, 164, 164, 163, 163, 163, 163, 162, 162, 162, 161, 161, 161, 160, 160, 160, 159, 159, 158, 158, 158, 157, 157, 157, 157, 156, 156, 156, 155, 155, 154, 154, 154, 153, 153, 153, 152, 152, 152, 151, 151, 151, 150, 150, 149, 149, 149, 148, 148, 148, 147, 147, 147, 146, 146, 146, 145, 145, 144, 144, 144, 144, 143, 143, 142, 142, 141, 141, 141, 140, 140, 139, 139, 138, 138, 137, 137, 137, 136, 136, 135, 134, 134, 134, 133, 132, 132, 131, 131, 130, 130, 129, 128, 128, 128, 126, 126, 125, 125, 124, 124, 123, 123, 122, 122, 121, 121, 120, 119, 119, 118, 118, 118, 117, 117, 116, 116, 116, 115, 115, 115, 114, 114, 113, 113, 113, 112, 112, 112, 111, 111, 111, 110, 110, 110, 109, 109, 109, 108, 108, 108, 107, 107, 107, 106, 106, 105, 105, 105, 105, 104, 104, 103, 103, 103, 102, 102, 101, 101, 101, 101, 100, 100, 99, 99, 99, 99, 99, 98, 98, 98, 98, 98, 97, 97, 97, 97, 96, 96, 96, 96, 96, 95, 95, 95, 95, 95, 94, 94, 94, 93, 93, 93, 93, 93, 92, 92, 92, 91, 91, 91, 91, 91, 90, 90, 90, 90, 89, 89, 89, 89, 88, 88, 88, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 86, 87, 87, 87, 86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 86, 87, 87, 87, 86, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 87, 86, 86, 85, 85, 84, 84, 83, 83, 82, 82, 81, 81, 80, 80, 79, 79, 78, 78, 77, 77, 76, 76, 75, 75, 74, 74, 73, 73, 73, 72, 72, 71, 71, 71, 70, 70, 69, 69, 69, 68, 68, 67, 67, 67, 66, 66, 65, 65, 65, 64, 64, 63, 63, 63, 62, 62, 62, 61, 61, 61, 61, 60, 60, 60, 59, 59, 58, 58, 58, 58, 57, 57, 57, 56, 56, 56, 55, 55, 55, 54, 54, 54, 53, 53, 53, 52, 52, 52, 51, 51, 51, 50, 50, 50, 50, 49, 49, 49, 48, 48, 48, 47, 47, 46, 46, 46, 45, 45, 45, 45, 44, 44, 43, 43, 43, 42, 42, 41, 41, 41, 40, 40, 40, 39, 39, 38, 38, 38, 38, 37, 37, 36, 36, 36, 35, 35, 35, 35, 34, 34, 34, 34, 33, 33, 33, 33, 32, 32, 32, 31, 31, 31, 31, 30, 30, 30, 30, 29, 29, 29, 29, 29, 28, 28, 28, 28, 28, 27, 27, 27, 27, 27, 26, 26, 26, 26, 25, 25, 25, 25, 25, 24, 24, 24, 24, 24, 23, 23, 23, 23, 22, 22, 22, 22, 22, 21, 21, 21, 21, 21, 20, 20, 20, 20, 19, 19, 19, 19, 19, 19, 18, 18, 18, 18, 18, 18, 18, 17, 17, 17, 17, 17, 16, 16, 16, 16, 16, 16, 15, 15, 15, 15, 15, 14, 14, 14, 14, 14, 14, 13, 13, 13, 13, 13, 13, 12, 12, 12, 12, 12, 11, 11, 11, 11, 11, 11, 11, 11, 10, 10, 10, 10, 10, 10, 10, 10, 10, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]');
-  </script>
 </head>
 
 <body>
@@ -132,7 +130,7 @@
   <div>
     <button id="draw-wall" onclick="setDrawColor('#000000ff', 1);">Wall</button>
     <button id="draw-free-surface" onclick="setDrawColor('#ffffffff', 1);">Free-Surface</button>
-    <button id="draw-erase" onclick="setDrawColor('#88888800', 4);">Erase</button>
+    <button id="draw-erase" onclick="eraseColor();">Erase</button>
      FPS: <label id="FPS"></label></div>
   <script src="js/three.js"></script>
 
@@ -296,7 +294,7 @@
       float timeParts = 2.0 * p1 - p0;
       float sourceParts = dt2 * float(d < (length(dxdy) * 1.0)) * source.z * source.w * source.w * 39.47841 * cos(6.283185 * time * source.w);
       float f = textSourceFreq * wall.x;
-      sourceParts += textSourceAmp * dt2 * float(wall.y > 0.05) * wall.y * f * f * 39.47841 * cos(6.283185 * (time + wall.z) * f);
+      sourceParts += textSourceAmp * dt2 * float(wall.y > 0.05) * wall.y * f * f * 39.47841 * cos(6.283185 * (time * f + wall.z));
       float absorp = dt * edgeAlpha * (p1 - p0);
       float p = timeParts + dt2c2 * (xParts + yParts) + sourceParts + absorp;
 
@@ -330,7 +328,7 @@
   <script>
     function setupCanvasDrawing() {
       const drawingCanvas = document.getElementById('drawing-canvas');
-      const drawingContext = drawingCanvas.getContext('2d');
+      drawingContext = drawingCanvas.getContext('2d');
 
       // draw gray transparent background
 
@@ -371,7 +369,6 @@
 
     }
     function draw(drawContext, x, y) {
-      drawContext.globalCompositeOperation = "copy"; 
       drawContext.moveTo(drawStartPos.x, drawStartPos.y);
       let rgba = hexColtoIntArr(drawColor);
       drawContext.strokeStyle = "rgba("+rgba + ")";
@@ -393,6 +390,12 @@
     function setDrawColor(color, width) {
       drawColor = color;
       drawWidth = width;
+      drawingContext.globalCompositeOperation = "source-over"; 
+    }
+
+    function eraseColor(){
+      setDrawColor('#888888ff', 19);
+      drawingContext.globalCompositeOperation = "destination-out"; 
     }
 
     function str_pad_left(string, pad, length) {
@@ -428,18 +431,25 @@
     }   
 
     function updateDrawColor() {
-      let ampRamp = document.getElementById('amplitude-select');
       var hue = document.getElementById("frequency-select").value;
-      hue = frequncyColorRamp[Math.round(frequncyColorRamp.length * hue)] / 255 * 360;
+      hue = hue * 212 / 255 * 360;
       var sat = document.getElementById("amplitude-select").value;
       var val = document.getElementById("phase-select").value;
 
       var rgb = hsv2rgb(hue, sat, val) + "88";
-
+      
+      let ampRamp = document.getElementById('amplitude-select');
       let lowramp = hsv2rgb(hue, 0, 1);
       let highramp = hsv2rgb(hue, 1, 1);
-
+      
       ampRamp.style.setProperty("--amp-track-color", 'linear-gradient(to right,' + lowramp + ',' + highramp + ')');
+
+      let phaseRamp = document.getElementById('phase-select');
+      lowramp = hsv2rgb(hue, 1, 0);
+      highramp = hsv2rgb(hue, 1, 1);
+      
+      phaseRamp.style.setProperty("--phase-track-color", 'linear-gradient(to right,' + lowramp + ',' + highramp + ')');
+
 
       setDrawColor(rgb, 1);
     }
@@ -453,9 +463,10 @@
     const drawStartPos = new THREE.Vector2();
     var drawColor = "#00000000";
     var drawWidth = 1;
+    var drawingContext;
+    var drawingTexture = setupCanvasDrawing();
     updateDrawColor();
 
-    var drawingTexture = setupCanvasDrawing();
 
 
     ///////////////////This is the basic scene setup
