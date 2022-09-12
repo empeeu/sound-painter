@@ -11,6 +11,9 @@
     * [ ] Sound prober microphone
     * [ ] Refactor
     * [ ] Set up state in JSOn format so we can reload as needed
-    * [ ] reset the pressure field
+    * [x] reset the pressure field
+    * [x] Draw lines
+        * need an overlay to show where you are drawing the line
     * [ ] import png
     * [ ] Start time at 0
+    * [ ] Make a oscilloscope for the sound prober

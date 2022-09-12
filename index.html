@@ -112,6 +112,10 @@
       border-style: solid;
       border-width: 1px;
     }
+
+    #draw-line-width {
+      width: 3em;
+    }
   </style>
 </head>
 
@@ -122,14 +126,17 @@
   <div id="container" style="width:512px; height:512px; margin:auto;">
   </div>
   <div>
-    <input onchange="updateDrawColor();" id="frequency-select" type="range" min=0 max=1 step=0.01 value=0.5 />
+    <input onchange="updateDrawColor();" id="frequency-select" type="range" min=0.05 max=1 step=0.01 value=0.5 />
     <input onchange="updateDrawColor();" id="amplitude-select" type="range" min=0.05 max=1 step=0.01 value=0.5 />
     <input onchange="updateDrawColor();" id="phase-select" type="range" min=0.05 max=1 step=0.01 value=0.5 />
   </div>
-  <div><button id="Start" onclick="startStopRender();">Start</button></div>
   <div>
-    <button id="draw-wall" onclick="setDrawColor('#000000ff', 1);">Wall</button>
-    <button id="draw-free-surface" onclick="setDrawColor('#ffffffff', 1);">Free-Surface</button>
+    <button id="Start" onclick="startStopRender();">Start</button>
+    <label> Draw Line-Width<input id="draw-line-width" type=number min=1 max=50 value=2 onchange="drawWidth=parseInt(this.value);">
+    <label> Draw Free-Hand</label><input type="checkbox" id="free-hand-draw" checked /></div>
+  <div>
+    <button id="draw-wall" onclick="setDrawColor('#000000ff');">Wall</button>
+    <button id="draw-free-surface" onclick="setDrawColor('#ffffffff');">Free-Surface</button>
     <button id="draw-erase" onclick="eraseColor();">Erase</button>
     <button id="pressure-erase" onclick="pressureErase();">Erase Pressure Field</button>
     <button id="test-sound" onclick="mouseTestSound();">Turn Mouse Test Source ON</button>
@@ -348,10 +355,12 @@
 
       var paint = false;
       var mouseSourceIsOn = false;
+      var drawFreehand = false;
 
       drawingCanvas.addEventListener('pointerdown', function (e) {
 
         paint = true & !mouseSource;
+        drawFreehand = document.getElementById('free-hand-draw').checked;
         mouseSourceIsOn = mouseSource;
         if (paint){
           drawingContext.beginPath();
@@ -364,8 +373,7 @@
       });
 
       drawingCanvas.addEventListener('pointermove', function (e) {
-
-        if (paint) draw(drawingContext, e.offsetX, e.offsetY);
+        if (paint & drawFreehand) draw(drawingContext, e.offsetX, e.offsetY);
         if (mouseSource) {
           source.x = e.offsetX / widthContainer;
           source.y = (heightContainer - e.offsetY) / heightContainer;
@@ -409,14 +417,13 @@
 
     }
 
-    function setDrawColor(color, width) {
+    function setDrawColor(color) {
       drawColor = color;
-      drawWidth = width;
       drawingContext.globalCompositeOperation = "source-over"; 
     }
 
     function eraseColor(){
-      setDrawColor('#888888ff', 19);
+      setDrawColor('#888888ff');
       drawingContext.globalCompositeOperation = "destination-out"; 
     }
 
@@ -484,7 +491,7 @@
       phaseRamp.style.setProperty("--phase-track-color", 'linear-gradient(to right,' + lowramp + ',' + highramp + ')');
 
 
-      setDrawColor(rgb, 1);
+      setDrawColor(rgb);
     }
 
     function mouseTestSound(){
@@ -505,7 +512,7 @@
     /////////////////// This is for our Drawing CANVAS
     const drawStartPos = new THREE.Vector2();
     var drawColor = "#00000000";
-    var drawWidth = 1;
+    var drawWidth = 2;
     var drawingContext;
     var drawingTexture = setupCanvasDrawing();
     var mouseSource = false;
