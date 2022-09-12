@@ -421,12 +421,14 @@
     }
 
     function pressureErase(){
-      renderer.setRenderTarget(textureRing[0]);
-      renderer.render(bufferScene, camera);
-      renderer.setRenderTarget(textureRing[1]);
-      renderer.render(bufferScene, camera);
-      renderer.setRenderTarget(textureRing[2]);
-      renderer.render(bufferScene, camera);
+      renderer.setRenderTarget(pressureTexture0);
+      renderer.render(initScene, camera);
+      renderer.setRenderTarget(pressureTexture1);
+      renderer.render(initScene, camera);
+      renderer.setRenderTarget(pressureTexture2);
+      renderer.render(initScene, camera);
+      renderer.setRenderTarget(null);
+      renderer.render(scene, camera);
     }
 
     function str_pad_left(string, pad, length) {
