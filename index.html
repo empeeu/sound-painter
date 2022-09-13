@@ -312,14 +312,15 @@
 
       vec4 timeParts = 2.0 * p1 - p0;
       float f = textSourceFreq * source.w;
-      float mouseSourceParts = textSourceAmp * dt2 * float(d < (length(dxdy) * 1.0)) * source.z * f * f * 39.47841 * cos(6.283185 * time * f);
+      float mouseSourceParts = dt2 * float(d < (length(dxdy) * 1.0)) * source.z * f * f * 39.47841 * cos(6.283185 * time * f);
+      float mouseSourceParts2 =  source.z * textSourceAmp * dt2 * float(d < (length(dxdy) * 1.0)) * source.z * f * f * 39.47841 * sin(6.283185 * time * f);
       // use the transparency to keep track of the amplitude
-      vec4 sourceParts = vec4(mouseSourceParts, mouseSourceParts, mouseSourceParts, source.z);
+      vec4 sourceParts = vec4(source.w * mouseSourceParts, mouseSourceParts, source.z * textSourceAmp * mouseSourceParts, mouseSourceParts2);
       
       f = textSourceFreq * wall.x;
-      sourceParts.x += wall.x * dt2 * float(wall.y > 0.05) * f * f * 39.47841 * cos(6.283185 * (time * f + wall.z));
       sourceParts.y += dt2 * float(wall.y > 0.05) * f * f * 39.47841 * cos(6.283185 * (time * f + wall.z));
-      sourceParts.z += wall.y * textSourceAmp * dt2 * float(wall.y > 0.05) * f * f * 39.47841 * cos(6.283185 * (time * f + wall.z));
+      sourceParts.x += wall.x * sourceParts.y;
+      sourceParts.z += wall.y * textSourceAmp * sourceParts.y;
       sourceParts.w += wall.y * textSourceAmp * dt2 * float(wall.y > 0.05) * f * f * 39.47841 * sin(6.283185 * (time * f + wall.z));
       vec4 absorp = dt * edgeAlpha * (p1 - p0) + absorpCoeff * dt2c2 * (p1up - p1) / (dz * dz);
       vec4 p = timeParts + dt2c2 * (xParts + yParts + zParts) + sourceParts + absorp;

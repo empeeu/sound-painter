@@ -8,6 +8,7 @@
     * ~~[] 3D vs 2D sound option~~
     * [x] attenuation
     * [x] Switch over to RGBA pressure textures for colored waves
+    * [x] fix mouse prober source
     * [ ] Sound prober microphone
     * [ ] Refactor
     * [ ] Make a oscilloscope for the sound prober
