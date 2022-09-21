@@ -145,7 +145,13 @@
     <button id="draw-erase" onclick="eraseColor();">Erase</button>
     <button id="pressure-erase" onclick="pressureErase();">Erase Pressure Field</button>
     <button id="test-sound" onclick="mouseTestSound();">Turn Mouse Test Source ON</button>
-     FPS: <label id="FPS"></label></div>
+    </div>
+    <div>
+      x: <label id="mouse-x"></label>, y: <label id="mouse-y"></label>, p: <label id="mouse-p"></label> 
+    </div>
+    <div>
+     FPS: <label id="FPS"></label>
+    </div>
   <script src="js/three.js"></script>
 
   <script id="vertexShader" type="x-shader/x-vertex">
@@ -312,17 +318,17 @@
       }
 
       vec4 timeParts = 2.0 * p1 - p0;
-      float f = textSourceFreq * source.w;
-      float mouseSourceParts = dt2 * float(d < (length(dxdy) * 1.0)) * source.z * f * f * 39.47841 * cos(6.283185 * time * f);
-      float mouseSourceParts2 =  source.z * textSourceAmp * dt2 * float(d < (length(dxdy) * 1.0)) * source.z * f * f * 39.47841 * sin(6.283185 * time * f);
+      float f = textSourceFreq * (pow(2.0, source.w) - 1.0);
+      float mouseSourceParts = dt2 * float(d < (length(dxdy) * 1.0)) * float(source.z > 0.0) * f * f * 39.47841 * cos(6.283185 * time * f);
+      float mouseSourceParts2 =  textSourceAmp * source.z * dt2 * float(d < (length(dxdy) * 1.0)) * f * f * 39.47841 * sin(6.283185 * time * f);
       // use the transparency to keep track of the amplitude
       vec4 sourceParts = vec4(source.w * mouseSourceParts, mouseSourceParts, source.z * textSourceAmp * mouseSourceParts, mouseSourceParts2);
       
-      f = textSourceFreq * wall.x;
-      sourceParts.y += dt2 * float(wall.y > 0.05) * f * f * 39.47841 * cos(6.283185 * (time * f + wall.z));
+      f = textSourceFreq * (pow(2.0, wall.x) - 1.0);
+      sourceParts.y += dt2 * float(wall.y > 0.05) * 39.47841 * f * f * cos(6.283185 * (time * f + wall.z));
       sourceParts.x += wall.x * sourceParts.y;
       sourceParts.z += wall.y * textSourceAmp * sourceParts.y;
-      sourceParts.w += wall.y * textSourceAmp * dt2 * float(wall.y > 0.05) * f * f * 39.47841 * sin(6.283185 * (time * f + wall.z));
+      sourceParts.w += wall.y * textSourceAmp * dt2 * float(wall.y > 0.05) * 39.47841 * f * f * sin(6.283185 * (time * f + wall.z));
       vec4 absorp = dt * edgeAlpha * (p1 - p0) + absorpCoeff * dt2c2 * (p1up - p1) / (dz * dz);
       vec4 p = timeParts + dt2c2 * (xParts + yParts + zParts) + sourceParts + absorp;
 
@@ -413,6 +419,14 @@
           source.y = (heightContainer - e.offsetY) / heightContainer;
           uniforms.source.value = source;
         }
+        var mx = document.getElementById('mouse-x');
+        var my = document.getElementById('mouse-y');
+        var mp = document.getElementById('mouse-p');
+        mx.innerText = e.offsetX;
+        my.innerText = e.offsetY;
+        renderer.readRenderTargetPixels(textureRing[2], e.offsetX, heightContainer - e.offsetY, 1, 1, pressureBuf);
+        mp.innerText = pressureBuf[2];
+
 
       });
 
@@ -552,6 +566,9 @@
     var mouseSource = false;
     updateDrawColor();
 
+    ////////////////// This is for probing the pressure values
+    var pressureBuf = new Float32Array(4);
+
 
 
     ///////////////////This is the basic scene setup
@@ -645,8 +662,8 @@
         type: "t",
         value: drawingTexture
       },
-      textSourceAmp: {value: 1.0},
-      textSourceFreq: { value: widthDomain / 4},
+      textSourceAmp: {value: 25.0},
+      textSourceFreq: { value: widthDomain / 8},
       absorpCoeff: { value : 0.0}
     };
     /// This is the material that houses the custom shader that does the computation
@@ -716,6 +733,7 @@
       i += 1;
 
       // TO READ pixels off a float texture, the texture needs to be in RGBA format
+      // buff = new Float32Array(4);
       // renderer.readRenderTargetPixels(pressureTexture0, 64, 64, 1, 1, buff);
       // https://r105.threejsfundamentals.org/threejs/lessons/threejs-indexed-textures.html
 
