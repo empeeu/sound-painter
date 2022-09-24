@@ -19,26 +19,29 @@
     <input onchange="updateDrawColor();" id="phase-select" type="range" min=0.05 max=1 step=0.01 value=0.5 />
   </div>
   <div>
-    <label>Absorption Coefficient: </label><input onchange="uniforms.absorpCoeff.value=this.value;" type="range" min=0 max=0.1 step=0.001 value=0 />
+    <label>Absorption Coefficient: </label><input onchange="uniforms.absorpCoeff.value=this.value;" type="range" min=0
+      max=0.1 step=0.001 value=0 />
   </div>
 
   <div>
     <button id="Start" onclick="startStopRender();">Start</button>
-    <label> Draw Line-Width<input id="draw-line-width" type=number min=1 max=50 value=2 onchange="drawWidth=parseInt(this.value);">
-    <label> Draw Free-Hand</label><input type="checkbox" id="free-hand-draw" checked /></div>
+    <label> Draw Line-Width<input id="draw-line-width" type=number min=1 max=50 value=2
+        onchange="drawWidth=parseInt(this.value);">
+      <label> Draw Free-Hand</label><input type="checkbox" id="free-hand-draw" checked />
+  </div>
   <div>
     <button id="draw-wall" onclick="setDrawColor('#000000ff');">Wall</button>
     <button id="draw-free-surface" onclick="setDrawColor('#ffffffff');">Free-Surface</button>
     <button id="draw-erase" onclick="eraseColor();">Erase</button>
     <button id="pressure-erase" onclick="pressureErase();">Erase Pressure Field</button>
     <button id="test-sound" onclick="mouseTestSound();">Turn Mouse Test Source ON</button>
-    </div>
-    <div>
-      x: <label id="mouse-x"></label>, y: <label id="mouse-y"></label>, p: <label id="mouse-p"></label> 
-    </div>
-    <div>
-     FPS: <label id="FPS"></label>
-    </div>
+  </div>
+  <div>
+    x: <label id="mouse-x"></label>, y: <label id="mouse-y"></label>, p: <label id="mouse-p"></label>
+  </div>
+  <div>
+    FPS: <label id="FPS"></label>
+  </div>
   <script src="js/three.js"></script>
   <script src="js/shaders.js"></script>
 
