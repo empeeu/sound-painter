@@ -4,7 +4,8 @@
 <head>
   <meta charset="utf-8">
   <title>FDTD Acoustic Simulation app</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="stylesheet" href="./css/probePlot.css">
 </head>
 
 <body>
@@ -34,9 +35,10 @@
     <button id="draw-free-surface" onclick="setDrawColor('#ffffffff');">Free-Surface</button>
     <button id="draw-erase" onclick="eraseColor();">Erase</button>
     <button id="pressure-erase" onclick="pressureErase();">Erase Pressure Field</button>
-    <button id="test-sound" onclick="mouseTestSound();">Turn Mouse Test Source ON</button>
+    <button id="test-sound" onclick="mouseTestSound();">Mouse Sound OFF</button>
   </div>
   <div>
+    <button id="probe-sound" onclick="mouseProbeSound();">Mouse Probe OFF</button>
     x: <label id="mouse-x"></label>, y: <label id="mouse-y"></label>, p: <label id="mouse-p"></label>
   </div>
   <div>

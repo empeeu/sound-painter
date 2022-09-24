@@ -36,11 +36,10 @@ function render() {
     renderer.render(scene, camera);
     i += 1;
 
-    // TO READ pixels off a float texture, the texture needs to be in RGBA format
-    // buff = new Float32Array(4);
-    // renderer.readRenderTargetPixels(pressureTexture0, 64, 64, 1, 1, buff);
-    // https://r105.threejsfundamentals.org/threejs/lessons/threejs-indexed-textures.html
-
+    // Update probe if needed
+    if (mouseProbe){
+        mouseProbeUpdate();
+    }
 }
 // render();
 var doRunSim = false;

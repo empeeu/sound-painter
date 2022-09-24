@@ -8,6 +8,7 @@ var drawWidth = 2;
 var drawingContext;
 var drawingTexture = setupCanvasDrawing();
 var mouseSource = false;
+var mouseProbe = false;
 updateDrawColor();
 
 ////////////////// This is for probing the pressure values

@@ -35,14 +35,13 @@ function setupCanvasDrawing() {
             source.y = (heightContainer - e.offsetY) / heightContainer;
             uniforms.source.value = source;
         }
-        var mx = document.getElementById('mouse-x');
-        var my = document.getElementById('mouse-y');
-        var mp = document.getElementById('mouse-p');
-        mx.innerText = e.offsetX;
-        my.innerText = e.offsetY;
-        renderer.readRenderTargetPixels(textureRing[2], e.offsetX, heightContainer - e.offsetY, 1, 1, pressureBuf);
-        mp.innerText = pressureBuf[2];
-
+        if (mouseProbe) {
+            var mx = document.getElementById('mouse-x');
+            var my = document.getElementById('mouse-y');
+            mx.innerText = e.offsetX;
+            my.innerText = e.offsetY;
+            mouseProbeUpdate();
+        }
 
     });
 
@@ -160,9 +159,32 @@ function updateDrawColor() {
 function mouseTestSound() {
     if (mouseSource) {
         mouseSource = false;
-        document.getElementById("test-sound").innerText = "Turn Mouse Test Source ON"
+        document.getElementById("test-sound").innerText = "Mouse Sound OFF";
     } else {
         mouseSource = true;
-        document.getElementById("test-sound").innerText = "Turn Mouse Test Source OFF"
+        document.getElementById("test-sound").innerText = "Mouse Sound ON ";
     }
+}
+
+function mouseProbeSound() {
+    if (mouseProbe) {
+        mouseProbe = false;
+        document.getElementById("probe-sound").innerText = "Mouse Probe OFF.";
+    } else {
+        mouseProbe = true;
+        document.getElementById("probe-sound").innerText = "Mouse Probe ON .";
+    }
+}
+
+function mouseProbeUpdate() {
+    var mx = document.getElementById('mouse-x');
+    var my = document.getElementById('mouse-y');
+    var mp = document.getElementById('mouse-p');
+    renderer.readRenderTargetPixels(
+        textureRing[2],
+        parseInt(mx.innerText),
+        heightContainer - parseInt(my.innerText),
+        1, 1, pressureBuf
+    );
+    mp.innerText = pressureBuf[2];
 }
