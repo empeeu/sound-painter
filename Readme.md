@@ -1,3 +1,5 @@
+Website: https://empeeu.github.io/sound-painter/
+
 * TODOs:
     * [x] source painting
         * The MAP of HSV to frequency is probably not quite right... need to figure this one out... hmmm...
