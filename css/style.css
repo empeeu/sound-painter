@@ -1,0 +1,112 @@
+body {
+    margin: 0;
+}
+
+:root {
+    --amp-track-color: 'white';
+    --phase-track-color: 'white';
+}
+
+#canvas-container {
+    /* position: fixed;
+top: 0px;
+width: 100%; */
+}
+
+#drawing-canvas {
+    position: absolute;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: -512px;
+    left: 0px;
+    right: 0px;
+}
+
+#frequency-select {
+    width: 256px;
+    height: 20px;
+}
+
+#frequency-select::-webkit-slider-runnable-track {
+    background-image: url("/static/frequencyRamp.png");
+    background-size: contain;
+    height: 5px;
+    border-style: solid;
+    border-width: 1px;
+}
+
+#frequency-select:focus::-webkit-slider-runnable-track {
+    background-image: url("/static/frequencyRamp.png");
+    background-size: contain;
+    height: 5px;
+    border-style: solid;
+    border-width: 1px;
+}
+
+#frequency-select::-moz-range-track {
+    background-image: url("/static/frequencyRamp.png");
+    background-size: contain;
+    height: 5px;
+    border-style: solid;
+    border-width: 1px;
+}
+
+#frequency-select::-ms-fill-lower {
+    background-image: url("/static/frequencyRamp.png");
+    background-size: contain;
+    height: 5px;
+    border-style: solid;
+    border-width: 1px;
+}
+
+#frequency-select::-ms-fill-upper {
+    background-image: url("/static/frequencyRamp.png");
+    background-size: contain;
+    height: 5px;
+    border-style: solid;
+    border-width: 1px;
+}
+
+#frequency-select:focus::-ms-fill-lower {
+    background-image: url("/static/frequencyRamp.png");
+    background-size: contain;
+    height: 5px;
+    border-style: solid;
+    border-width: 1px;
+}
+
+#frequency-select:focus::-ms-fill-upper {
+    background-image: url("/static/frequencyRamp.png");
+    background-size: contain;
+    height: 5px;
+    border-style: solid;
+    border-width: 1px;
+}
+
+#amplitude-select {
+    width: 256px;
+    height: 20px;
+}
+
+#amplitude-select::-moz-range-track {
+    background: var(--amp-track-color);
+    height: 5px;
+    border-style: solid;
+    border-width: 1px;
+}
+
+#phase-select {
+    width: 256px;
+    height: 20px;
+}
+
+#phase-select::-moz-range-track {
+    background: var(--phase-track-color);
+    height: 5px;
+    border-style: solid;
+    border-width: 1px;
+}
+
+#draw-line-width {
+    width: 3em;
+}
