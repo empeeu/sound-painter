@@ -166,29 +166,3 @@ function mouseTestSound() {
     }
 }
 
-function mouseProbeSound() {
-    if (mouseProbe) {
-        mouseProbe = false;
-        document.getElementById("probe-sound").innerText = "Mouse Probe OFF.";
-    } else {
-        mouseProbe = true;
-        document.getElementById("probe-sound").innerText = "Mouse Probe ON .";
-    }
-}
-
-function mouseProbeUpdate() {
-    var mx = document.getElementById('mouse-x');
-    var my = document.getElementById('mouse-y');
-    var mp = document.getElementById('mouse-p');
-    renderer.readRenderTargetPixels(
-        textureRing[2],
-        parseInt(mx.innerText),
-        heightContainer - parseInt(my.innerText),
-        1, 1, pressureBuf
-    );
-    mp.innerText = pressureBuf[2];
-    pressureHist.push({val: pressureBuf[2], time: simTime});
-    if (pressureHist.length > widthDomain){
-        pressureHist = pressureHist.slice(1, pressureHist.length);
-    }
-}

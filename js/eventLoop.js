@@ -39,6 +39,7 @@ function render() {
     // Update probe if needed
     if (mouseProbe){
         mouseProbeUpdate();
+        plotPressure(0.6, 1);
     }
 }
 // render();
