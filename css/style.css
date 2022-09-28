@@ -28,7 +28,7 @@ width: 100%; */
 }
 
 #frequency-select::-webkit-slider-runnable-track {
-    background-image: url("/static/frequencyRamp.png");
+    background-image: url("../static/frequencyRamp.png");
     background-size: contain;
     height: 5px;
     border-style: solid;
@@ -36,7 +36,7 @@ width: 100%; */
 }
 
 #frequency-select:focus::-webkit-slider-runnable-track {
-    background-image: url("/static/frequencyRamp.png");
+    background-image: url("../static/frequencyRamp.png");
     background-size: contain;
     height: 5px;
     border-style: solid;
@@ -44,7 +44,7 @@ width: 100%; */
 }
 
 #frequency-select::-moz-range-track {
-    background-image: url("/static/frequencyRamp.png");
+    background-image: url("../static/frequencyRamp.png");
     background-size: contain;
     height: 5px;
     border-style: solid;
@@ -52,7 +52,7 @@ width: 100%; */
 }
 
 #frequency-select::-ms-fill-lower {
-    background-image: url("/static/frequencyRamp.png");
+    background-image: url("../static/frequencyRamp.png");
     background-size: contain;
     height: 5px;
     border-style: solid;
@@ -60,7 +60,7 @@ width: 100%; */
 }
 
 #frequency-select::-ms-fill-upper {
-    background-image: url("/static/frequencyRamp.png");
+    background-image: url("../static/frequencyRamp.png");
     background-size: contain;
     height: 5px;
     border-style: solid;
@@ -68,7 +68,7 @@ width: 100%; */
 }
 
 #frequency-select:focus::-ms-fill-lower {
-    background-image: url("/static/frequencyRamp.png");
+    background-image: url("../static/frequencyRamp.png");
     background-size: contain;
     height: 5px;
     border-style: solid;

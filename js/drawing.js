@@ -187,4 +187,8 @@ function mouseProbeUpdate() {
         1, 1, pressureBuf
     );
     mp.innerText = pressureBuf[2];
+    pressureHist.push({val: pressureBuf[2], time: simTime});
+    if (pressureHist.length > widthDomain){
+        pressureHist = pressureHist.slice(1, pressureHist.length);
+    }
 }

@@ -11,11 +11,6 @@ var mouseSource = false;
 var mouseProbe = false;
 updateDrawColor();
 
-////////////////// This is for probing the pressure values
-var pressureBuf = new Float32Array(4);
-
-
-
 ///////////////////This is the basic scene setup
 var scene = new THREE.Scene();
 var widthContainer = container.offsetWidth;
@@ -37,35 +32,35 @@ var heightDomain = heightContainer;
 
 var pressureTexture0 = new THREE.WebGLRenderTarget(
     widthDomain, heightDomain, {
-    minFilter: THREE.LinearFilter,
-    magFilter: THREE.NearestFilter,
-    type: THREE.FloatType,
-    // format: THREE.RedFormat
-});
-var pressureTexture1 = new THREE.WebGLRenderTarget(
-    widthDomain, heightDomain, {
-    minFilter: THREE.LinearFilter,
-    magFilter: THREE.NearestFilter,
-    type: THREE.FloatType,
-    // format: THREE.RedFormat
-
-});
-var pressureTexture2 = new THREE.WebGLRenderTarget(
-    widthDomain, heightDomain, {
-    minFilter: THREE.LinearFilter,
-    magFilter: THREE.NearestFilter,
-    type: THREE.FloatType,
-    // format: THREE.RedFormat
-});
-
-var textureRing = [pressureTexture0, pressureTexture1, pressureTexture2];
-
-// Create an initialization shader 
-var initMaterial = new THREE.ShaderMaterial({
-    vertexShader: sndptr.vertexShader,
-    fragmentShader: sndptr.initFragmentShader
-});
-// var planeMaterial = new THREE.MeshBasicMaterial({ color: 0x7074FF });
+        minFilter: THREE.LinearFilter,
+        magFilter: THREE.NearestFilter,
+        type: THREE.FloatType,
+        // format: THREE.RedFormat
+    });
+    var pressureTexture1 = new THREE.WebGLRenderTarget(
+        widthDomain, heightDomain, {
+            minFilter: THREE.LinearFilter,
+            magFilter: THREE.NearestFilter,
+            type: THREE.FloatType,
+            // format: THREE.RedFormat
+            
+        });
+        var pressureTexture2 = new THREE.WebGLRenderTarget(
+            widthDomain, heightDomain, {
+                minFilter: THREE.LinearFilter,
+                magFilter: THREE.NearestFilter,
+                type: THREE.FloatType,
+                // format: THREE.RedFormat
+            });
+            
+            var textureRing = [pressureTexture0, pressureTexture1, pressureTexture2];
+            
+            // Create an initialization shader 
+            var initMaterial = new THREE.ShaderMaterial({
+                vertexShader: sndptr.vertexShader,
+                fragmentShader: sndptr.initFragmentShader
+            });
+            // var planeMaterial = new THREE.MeshBasicMaterial({ color: 0x7074FF });
 /// We attach this shader to a plane and add it to our buffer scne
 var initPlane = new THREE.PlaneGeometry(widthContainer, heightContainer);
 var initPlaneObject = new THREE.Mesh(initPlane, initMaterial);
@@ -116,7 +111,7 @@ var planeMaterial = new THREE.ShaderMaterial({
     uniforms: uniforms,
     vertexShader: sndptr.vertexShader,
     fragmentShader: sndptr.pressureFragmentShader
-
+    
 });
 // var planeMaterial = new THREE.MeshBasicMaterial({ color: 0x7074FF });
 /// We attach this shader to a plane and add it to our buffer scne
@@ -139,3 +134,10 @@ var plane2 = new THREE.PlaneGeometry(widthContainer, heightContainer);
 var mainPlaneObject = new THREE.Mesh(plane2, planeMaterial2);
 mainPlaneObject.position.z = 0;
 scene.add(mainPlaneObject);
+
+
+// Finally, we need to setup our probe plotter and save the context for later drawing
+////////////////// This is for probing the pressure values
+var pressureBuf = new Float32Array(4);
+var pressureHist = [];  // History of pressure values for probe plotting
+var probeContext = setupProbePlot();
