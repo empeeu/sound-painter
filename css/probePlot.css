@@ -4,22 +4,29 @@
     margin-right: auto;
     left: 0px;
     right: 0px;
-    border: solid;
-    padding: 50px;
+    /* border: solid; */
+    /* padding: 50px; */
 }
 
 .plotAxis {
     background-color: whitesmoke;
     width: 100%;
     height: 100%;
+    /* margin: -15px; */
 }
 
 .plotCanvas {
-    width:100%;
-    height: 100%;
-    border: dashed;
+    /* width:100%;
+    height: 100%; */
+    border-color:lightgray;
+    border-width: 1px; 
+    border-style: solid;
+    /* -webkit-box-sizing: border-box; */
+    /* -moz-box-sizing: border-box; */
+    position: absolute;
 }
 
 #probeCanvas {
-    border:dotted;
+    /* border:dotted; */
+    /* background-color: darkblue; */
 }

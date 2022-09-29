@@ -15,22 +15,39 @@ function setupProbePlot(){
     // The draw canvas has margins all around
     // the axes is a canvas ON TOP of the draw canvas -- more static
     // and takes up full container size
-
-    probeContainer.style.width = widthDomain + 'px';
-    console.log(probeContainer.style.width);
+    let margin = 50;
+    probeContainer.style.width = widthDomain + margin * 2 + 'px';
     let probeContainerHeight = Math.round(widthDomain / 1.618);
-    probeContainer.style.height = probeContainerHeight + 'px';
+    probeContainer.style.height = probeContainerHeight + margin * 2 + 'px';
     // Add the container for the axis and axis labels
     let probeAxis = document.createElement("div");
     probeAxis.classList = ["plotAxis"];
     probeContainer.append(probeAxis);
+    let svgContainer = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svgContainer.setAttribute("width", widthDomain + margin * 2);
+    svgContainer.setAttribute("height", probeContainerHeight + margin * 2);
+    probeAxis.append(svgContainer);
+    // Centerline
+    let centerLine = drawSvgLine(
+        [margin, widthDomain+margin],
+        [probeContainerHeight / 2 + margin, probeContainerHeight / 2 + margin],
+        "rgb(50, 50, 50)",
+        3);
+    centerLine.id = "plotCenterline";
+    svgContainer.append(centerLine); 
 
+    let ticks = drawTicks(5, widthDomain, probeContainerHeight, margin, 'rgb(0,0,0)', 1);
+    for (var i =0; i< ticks.length; i++){
+        svgContainer.append(ticks[i]);
+    }
     // Add the canvas for actually drawing the probed pressure
     let probeCanvasContainer = document.createElement("div");
     probeCanvasContainer.classList = ["plotCanvas"];
-    // probeCanvasContainer.style.width = widthDomain + 'px';
+    probeCanvasContainer.style.top = margin + 'px';
+    probeCanvasContainer.style.left = margin + 'px';
     probeContainer.append(probeCanvasContainer);
-    probeCanvasContainer.style.marginTop = -probeContainerHeight + 'px';
+    probeCanvasContainer.style.height = probeContainerHeight + 'px';
+    probeCanvasContainer.style.width = widthDomain + 'px';
     let probeCanvas = document.createElement("canvas");
     probeCanvas.width = widthDomain + 'px';
     probeCanvas.height = probeContainerHeight + 'px';
@@ -42,6 +59,35 @@ function setupProbePlot(){
     probeCanvas.width = widthDomain;
     probeCanvas.height = probeContainerHeight;
     return canvasContext;
+} 
+
+function drawSvgLine(x, y, stroke, strokeWidth){
+    let svgLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    svgLine.id = "plotCenterline";
+    svgLine.setAttribute("x1", x[0]);
+    svgLine.setAttribute("x2", x[1]);
+    svgLine.setAttribute("y1", y[0]);
+    svgLine.setAttribute("y2", y[1]);
+    svgLine.setAttribute("stroke", stroke);
+    svgLine.setAttribute("stroke-width", strokeWidth);
+    return svgLine;
+}
+
+function drawTicks(n, width, height, margin, stroke, strokeWidth){
+    let ticks = [];
+    let dx = width / (n - 1);
+    let dy = height / (n - 1);
+    let tl = 5;
+    let m = margin;
+    for (var i = 0; i < n; i++){
+        vt = drawSvgLine([i * dx + m, i * dx + m], [height / 2 - tl + m, height / 2 + tl + m], stroke, strokeWidth);
+        vt2 = drawSvgLine([i * dx + m, i * dx + m], [height + m, height + tl + m], stroke, strokeWidth);
+        ht = drawSvgLine([-tl + m, tl + m], [i * dy + m, i * dy + m], stroke, strokeWidth);
+        ticks.push(vt);
+        ticks.push(vt2);
+        ticks.push(ht);
+    }
+    return ticks;
 }
 
 function mouseProbeSound() {
