@@ -30,3 +30,18 @@
     /* border:dotted; */
     /* background-color: darkblue; */
 }
+
+.plotTickLabel {
+    font: bold 1em sans-serif;
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+
+.plotTickLabelH {
+    translate: 0 1.5em;
+}
+.plotTickLabelV {
+    text-anchor: end;
+    translate: -0.5em;
+    text-align: right;
+}

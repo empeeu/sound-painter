@@ -40,6 +40,12 @@ function setupProbePlot(){
     for (var i =0; i< ticks.length; i++){
         svgContainer.append(ticks[i]);
     }
+    let labels = drawTickLabels(5, widthDomain, probeContainerHeight, margin, "#888888FF", "plotTickLabel")
+    for (var i =0; i< labels.length; i++){
+        svgContainer.append(labels[i]);
+    }
+
+
     // Add the canvas for actually drawing the probed pressure
     let probeCanvasContainer = document.createElement("div");
     probeCanvasContainer.classList = ["plotCanvas"];
@@ -73,6 +79,17 @@ function drawSvgLine(x, y, stroke, strokeWidth){
     return svgLine;
 }
 
+function drawSvgText(x, y, fill, text, id, classNames) {
+    let svgText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    svgText.id = id;
+    svgText.setAttribute("x", x);
+    svgText.setAttribute("y", y);
+    svgText.setAttribute("fill", fill);
+    svgText.innerHTML = text;
+    svgText.classList = classNames;
+    return svgText;
+}
+
 function drawTicks(n, width, height, margin, stroke, strokeWidth){
     let ticks = [];
     let dx = width / (n - 1);
@@ -88,6 +105,27 @@ function drawTicks(n, width, height, margin, stroke, strokeWidth){
         ticks.push(ht);
     }
     return ticks;
+}
+
+function drawTickLabels(n, width, height, margin, fill, className){
+    let labels = [];
+    let dx = width / (n - 1);
+    let dy = height / (n - 1);
+    let tl = 5;
+    let m = margin;
+    let classNamesH =className + " plotTickLabelH";
+    let classNamesV =className + " plotTickLabelV";
+    for (var i = 0; i < n; i++){
+        let idh = "svgTickTextH" + i;
+        let idv = "svgTickTextV" + i;
+        let textv = i + "v";
+        let texth = i + "h";
+        ht = drawSvgText(i * dx + m, height + m, fill, texth, idv, classNamesH);
+        vt = drawSvgText(m, i * dy + m, fill, textv, idv, classNamesV);
+        labels.push(vt);
+        labels.push(ht);
+    }
+    return labels;
 }
 
 function mouseProbeSound() {
