@@ -69,7 +69,7 @@ initScene.add(initPlaneObject);//We add it to the bufferScene instead of the nor
 
 // Now create the supporing data
 // initial pressure source
-var source = new THREE.Vector4(0.5, 0.5, 0, 64);
+var source = new THREE.Vector4(0.5, 0.5, 0, 0);
 
 // discretization. We assume the domain has a maximum dimension of 1
 // and then the other dimension depends on the aspect ratio
