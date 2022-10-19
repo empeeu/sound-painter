@@ -64,6 +64,7 @@ function setupProbePlot(){
     let canvasContext = probeCanvas.getContext('2d');
     probeCanvas.width = widthDomain;
     probeCanvas.height = probeContainerHeight;
+    updateLabels(5, 1, 1, 1);
     return canvasContext;
 } 
 
@@ -120,12 +121,23 @@ function drawTickLabels(n, width, height, margin, fill, className){
         let idv = "svgTickTextV" + i;
         let textv = i + "v";
         let texth = i + "h";
-        ht = drawSvgText(i * dx + m, height + m, fill, texth, idv, classNamesH);
+        ht = drawSvgText(i * dx + m, height + m, fill, texth, idh, classNamesH);
         vt = drawSvgText(m, i * dy + m, fill, textv, idv, classNamesV);
         labels.push(vt);
         labels.push(ht);
     }
     return labels;
+}
+
+function updateLabels(n, xlims, ylims){
+    var damp = (ylims / (n - 1)) * 2;
+    var timestep = xlims / (n - 1);
+    for (var i = 0; i < n; i++){
+        let ht = document.getElementById("svgTickTextV" + i);
+        ht.innerHTML = ylims - damp * i;
+        let vt = document.getElementById("svgTickTextH" + i);
+        vt.innerHTML = Math.round((- (n - i - 1) * timestep) * 100) / 100;
+    }
 }
 
 function mouseProbeSound() {
@@ -180,7 +192,7 @@ function plotPressure(xlims=1, ylims=2){
         x = Math.round(w - (maxTime - pressureHist[l].time) * drawDt);
         y = Math.round(pressureHist[l].val * drawDp + h / 2);
         probeContext.lineTo(x, h - y);
-        console.log(x, y, l);
+        // console.log(x, y, l);
         l--;
     }
     probeContext.stroke();

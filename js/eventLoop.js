@@ -40,6 +40,7 @@ function render() {
     if (mouseProbe){
         mouseProbeUpdate();
         plotPressure(0.6, 1);
+        updateLabels(5, 0.6, 1);
     }
 }
 // render();
