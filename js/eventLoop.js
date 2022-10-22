@@ -39,8 +39,12 @@ function render() {
     // Update probe if needed
     if (mouseProbe){
         mouseProbeUpdate();
-        plotPressure(0.6, 1);
-        updateLabels(5, 0.6, 1);
+        
+        plotPressure(document.getElementById("plotXlims").value,
+                     document.getElementById("plotYlims").value);
+        updateLabels(5,
+                     document.getElementById("plotXlims").value,
+                     document.getElementById("plotYlims").value);
     }
 }
 // render();

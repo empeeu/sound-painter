@@ -3,6 +3,17 @@ function setupProbePlot(){
     // grab the container
     let probeContainer = document.getElementById("pressureProbePlot");
 
+    // Add buttons to control the xlims and ylims
+    let xylims = document.createElement("div");
+    xylims.innerHTML = `
+        <label>xlims</label>
+        <input id="plotXlims" type="number" min="0.1" max="0.7" step="0.1" value="0.5">
+        <label>ylims</label>
+        <input id="plotYlims" type="number" min="0.0" step="0.2" value="2">
+    `;
+    xylims.id = "plotXYLims";
+    probeContainer.append(xylims);
+
     // Strategy is as follows
     //  *********** Main container ******************
     //  * |*********** Plot Canvas ***************  *
@@ -44,7 +55,6 @@ function setupProbePlot(){
     for (var i =0; i< labels.length; i++){
         svgContainer.append(labels[i]);
     }
-
 
     // Add the canvas for actually drawing the probed pressure
     let probeCanvasContainer = document.createElement("div");
@@ -134,9 +144,9 @@ function updateLabels(n, xlims, ylims){
     var timestep = xlims / (n - 1);
     for (var i = 0; i < n; i++){
         let ht = document.getElementById("svgTickTextV" + i);
-        ht.innerHTML = ylims - damp * i;
+        ht.innerHTML = Math.round((ylims - damp * i) * 1000) / 1000;
         let vt = document.getElementById("svgTickTextH" + i);
-        vt.innerHTML = Math.round((- (n - i - 1) * timestep) * 100) / 100;
+        vt.innerHTML = Math.round((-(n - i - 1) * timestep) * 100) / 100;
     }
 }
 
