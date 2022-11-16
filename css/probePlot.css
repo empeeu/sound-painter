@@ -24,6 +24,7 @@
     /* -webkit-box-sizing: border-box; */
     /* -moz-box-sizing: border-box; */
     position: absolute;
+    z-index: 9;
 }
 
 #probeCanvas {
@@ -44,4 +45,22 @@
     text-anchor: end;
     translate: -0.5em;
     text-align: right;
+}
+
+
+#plotXYLims {
+    position: absolute;
+    padding: 1em;
+}
+
+#plotOverlayContainer {
+    position: absolute;
+    z-index: 10;
+}
+
+#plotOverlay {
+    border-color:lightgray;
+    border-width: 1px;
+    border-style: solid;
+    opacity: 0.6;
 }

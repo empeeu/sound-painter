@@ -110,8 +110,3 @@ width: 100%; */
 #draw-line-width {
     width: 3em;
 }
-
-#plotXYLims {
-    position: absolute;
-    padding: 1em;
-}

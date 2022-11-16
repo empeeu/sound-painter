@@ -56,7 +56,33 @@ function setupProbePlot(){
         svgContainer.append(labels[i]);
     }
 
-    // Add the canvas for actually drawing the probed pressure
+    // Add an overlay SVG layer for drawing things ON TOP of the plot
+    let svgOverlay = document.createElement("div");
+    svgOverlay.id = "plotOverlayContainer";
+    probeContainer.append(svgOverlay);
+    svgOverlay.style.top = margin + 'px';
+    svgOverlay.style.left = margin + 'px';
+    svgOverlay.style.height = probeContainerHeight + 'px';
+    svgOverlay.style.width = widthDomain + 'px';
+    let svgOverlayContainer = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svgOverlayContainer.id = "plotOverlay";
+    svgOverlayContainer.setAttribute("width", widthDomain + "px");
+    svgOverlayContainer.setAttribute("height", probeContainerHeight + "px");
+    svgOverlay.append(svgOverlayContainer);
+    let testLine = drawSvgLine(
+        [0, widthDomain],
+        [probeContainerHeight / 4, probeContainerHeight / 4],
+        "rgba(256, 256, 50, 25)",
+        8);
+    let testLine2 = drawSvgLine(
+        [0, widthDomain],
+        [3*probeContainerHeight / 4, 3*probeContainerHeight / 4],
+        "rgba(256, 256, 50, 25)",
+        8);
+    svgOverlayContainer.append(testLine);
+    svgOverlayContainer.append(testLine2);
+
+    // Add the ca/nvas for actually drawing the probed pressure
     let probeCanvasContainer = document.createElement("div");
     probeCanvasContainer.classList = ["plotCanvas"];
     probeCanvasContainer.style.top = margin + 'px';

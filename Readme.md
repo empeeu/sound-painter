@@ -14,9 +14,9 @@ Website: https://empeeu.github.io/sound-painter/
     * [x] Sound prober microphone
     * [x] Refactor
     * [...] Make a oscilloscope for the sound prober
-       * [ ] Add title for time
+       * [x] Add title for time
        * [x] Add number inputs to change the x-y limits
-       * [ ] Add another SVG container as an overlay for the plot
+       * [x] Add another SVG container as an overlay for the plot
     * [ ] Fix source term amplitudes
     * [ ] Go to higher order numerics
     * [ ] need an overlay to show where you are drawing the line
