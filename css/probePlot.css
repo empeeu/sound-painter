@@ -24,7 +24,7 @@
     /* -webkit-box-sizing: border-box; */
     /* -moz-box-sizing: border-box; */
     position: absolute;
-    z-index: 9;
+    z-index: 1;
 }
 
 #probeCanvas {
@@ -55,7 +55,7 @@
 
 #plotOverlayContainer {
     position: absolute;
-    z-index: 10;
+    z-index: 2;
 }
 
 #plotOverlay {

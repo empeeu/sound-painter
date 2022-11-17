@@ -13,6 +13,19 @@ top: 0px;
 width: 100%; */
 }
 
+#canvas-overlay-container
+{
+    position: absolute;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: -512px;
+    left: 0px;
+    right: 0px;
+    z-index: 0;
+    width: 512px;
+    height: 512px;
+}
+
 #drawing-canvas {
     position: absolute;
     margin-left: auto;
@@ -20,6 +33,7 @@ width: 100%; */
     margin-bottom: -512px;
     left: 0px;
     right: 0px;
+    z-index: 1;
 }
 
 #frequency-select {
