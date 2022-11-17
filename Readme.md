@@ -17,14 +17,14 @@ Website: https://empeeu.github.io/sound-painter/
        * [x] Add title for time
        * [x] Add number inputs to change the x-y limits
        * [x] Add another SVG container as an overlay for the plot
+    * [x] need an overlay to show where you are drawing the line
+    * [ ] import png
     * [ ] Fix source term amplitudes
     * [ ] Go to higher order numerics
-    * [ ] need an overlay to show where you are drawing the line
     * [ ] Set up state in JSOn format so we can reload as needed
        * [ ] Rework the data structure
     * [x] reset the pressure field
     * [x] Draw lines
-    * [ ] import png
     * [ ] Start time at 0
 
 

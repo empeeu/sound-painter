@@ -1,6 +1,7 @@
 function setupCanvasDrawing() {
     const drawingCanvas = document.getElementById('drawing-canvas');
     drawingContext = drawingCanvas.getContext('2d');
+    let lineOverlay = document.getElementById('draw-line-overlay-helper');
 
     // draw gray transparent background
 
@@ -21,6 +22,14 @@ function setupCanvasDrawing() {
         if (paint) {
             drawingContext.beginPath();
             drawStartPos.set(e.offsetX, e.offsetY);
+            if (!drawFreehand){
+                lineOverlay.setAttribute("x1", e.offsetX);
+                lineOverlay.setAttribute("y1", e.offsetY);
+                lineOverlay.setAttribute("x2", e.offsetX);
+                lineOverlay.setAttribute("y2", e.offsetY);
+                lineOverlay.setAttribute("opacity", 0.5);
+                lineOverlay.setAttribute("stroke-width", drawWidth);
+            }
         }
         if (mouseSource) {
             source.z = parseFloat(document.getElementById('amplitude-select').value);
@@ -30,6 +39,10 @@ function setupCanvasDrawing() {
 
     drawingCanvas.addEventListener('pointermove', function (e) {
         if (paint & drawFreehand) draw(drawingContext, e.offsetX, e.offsetY);
+        if (paint & !drawFreehand){
+            lineOverlay.setAttribute("x2", e.offsetX);
+            lineOverlay.setAttribute("y2", e.offsetY);
+        }
         if (mouseSource) {
             source.x = e.offsetX / widthContainer;
             source.y = (heightContainer - e.offsetY) / heightContainer;
@@ -46,7 +59,12 @@ function setupCanvasDrawing() {
     });
 
     drawingCanvas.addEventListener('pointerup', function (e) {
-        if (paint) draw(drawingContext, e.offsetX, e.offsetY);
+        if (paint) {
+            draw(drawingContext, e.offsetX, e.offsetY);
+            if (!drawFreehand){
+                lineOverlay.setAttribute("opacity", 0.0);
+            }
+        }
         if (mouseSource) source.z = 0
         paint = false;
 

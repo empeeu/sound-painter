@@ -16,7 +16,9 @@
     <img id="canvas-overlay" src="./static/circles.svg"> </img>
   </div>
   <div id="canvas-draw-overlay-container">
-    <svg id="canvas-draw-overlay"> </svg>
+    <svg id="canvas-draw-overlay" opacity="1.0" width="512px" height="512px"> 
+      <line id="draw-line-overlay-helper" x1="0" x2="256" y1="0" y2="512" stroke="rgb(255, 255, 255)" stroke-width="1" opacity="0"></line>
+    </svg>
   </div>
   <div id="container" style="width:512px; height:512px; margin:auto;">
   </div>
