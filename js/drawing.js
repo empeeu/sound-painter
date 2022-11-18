@@ -54,6 +54,11 @@ function setupCanvasDrawing() {
             mx.innerText = e.offsetX;
             my.innerText = e.offsetY;
             mouseProbeUpdate();
+            if (!doRunSim) {
+                simTime += dt;
+                plotPressure(document.getElementById("plotXlims").value,
+                             document.getElementById("plotYlims").value);
+            }
         }
 
     });
