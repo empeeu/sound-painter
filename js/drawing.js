@@ -98,6 +98,19 @@ function draw(drawContext, x, y) {
 
 }
 
+function updateCanvasFromFile(event){
+    console.log('updating canvas');
+    let img = new Image();
+    img.onload = function(){
+        drawingContext.drawImage(img, 0, 0);
+        drawingTexture.needsUpdate = true;
+        console.log("Drawing image.");
+    }
+    img.onerror = function(){console.error("image load error")}
+    img.src = URL.createObjectURL(event.files[0]);
+}
+
+
 function setDrawColor(color) {
     drawColor = color;
     drawingContext.globalCompositeOperation = "source-over";
@@ -182,5 +195,13 @@ function mouseTestSound() {
         mouseSource = true;
         document.getElementById("test-sound").innerText = "Mouse Sound ON ";
     }
+}
+
+function clearCanvas(){
+    const drawingCanvas = document.getElementById('drawing-canvas');
+    drawingContext = drawingCanvas.getContext('2d');
+
+    drawingContext.clearRect( 0, 0, drawingCanvas.width, drawingCanvas.height);
+    drawingTexture.needsUpdate = true;
 }
 

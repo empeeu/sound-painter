@@ -141,3 +141,9 @@ scene.add(mainPlaneObject);
 var pressureBuf = new Float32Array(4);
 var pressureHist = [];  // History of pressure values for probe plotting
 var probeContext = setupProbePlot();
+
+// If there is already a file present for the canvas, go ahead and try to load it
+if (document.getElementById('canvas-file-input').files.length > 0) {
+    console.log("loading canvas image");
+    updateCanvasFromFile(document.getElementById('canvas-file-input'));
+};

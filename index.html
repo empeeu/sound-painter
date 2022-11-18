@@ -42,6 +42,7 @@
     <button id="draw-wall" onclick="setDrawColor('#000000ff');">Wall</button>
     <button id="draw-free-surface" onclick="setDrawColor('#ffffffff');">Free-Surface</button>
     <button id="draw-erase" onclick="eraseColor();">Erase</button>
+    <button id="draw-erase-all" onclick="clearCanvas();">Erase All</button>
     <button id="pressure-erase" onclick="pressureErase();">Erase Pressure Field</button>
     <button id="test-sound" onclick="mouseTestSound();">Mouse Sound OFF</button>
   </div>
@@ -51,6 +52,9 @@
   </div>
   <div>
     FPS: <label id="FPS"></label>
+  </div>
+  <div> 
+    <input id="canvas-file-input" type="file" oninput="updateCanvasFromFile(this);">
   </div>
   <div id="pressureProbePlot">
   </div>
