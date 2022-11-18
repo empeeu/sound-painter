@@ -54,6 +54,7 @@
     FPS: <label id="FPS"></label>
   </div>
   <div> 
+    <label>Show Overlay</label><input id="show-hide-overlay" type="checkbox" checked onchange="toggelShowHidState(document.getElementById('canvas-overlay'));"></label>
     <input id="canvas-file-input" type="file" oninput="updateCanvasFromFile(this);">
   </div>
   <div id="pressureProbePlot">
@@ -63,6 +64,7 @@
   
   <!-- Custom Code -->
   <script src="js/shaders.js"></script>
+  <script src="js/utils.js"></script>
   <script src="./js/drawing.js"></script>
   <script src="./js/probePlot.js"></script>
   <script src="./js/init.js"></script>
