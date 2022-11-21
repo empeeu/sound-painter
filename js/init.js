@@ -102,7 +102,7 @@ uniforms = {
         type: "t",
         value: drawingTexture
     },
-    textSourceAmp: { value: 25.0 },
+    textSourceAmp: { value: 5.0 },
     textSourceFreq: { value: widthDomain / 8 },
     absorpCoeff: { value: 0.0 }
 };

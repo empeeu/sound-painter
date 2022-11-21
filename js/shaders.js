@@ -72,13 +72,28 @@ void main()	{
 sndptr["pressureFragmentShader"] = `
 /*
 Main equation on the interior
-d^2(p)/dt^2 = c^2 nabla^2 (p)
+d^2(p)/dt^2 = c^2 nabla^2 (p) + df/dt
+
+let q = dp/dt - f(t)
+
+dq / dt = c^2 nabla^2 (p)
+dp / dt = q + f(t)  # source term
+
+q(t) = q(t-1) + dt * G
+p(t) = p(t-1) + dt (q + f(t))
+q = (p(t) - p(t-1)) / dt - f(t)
+(p(t) - p(t-1)) / dt - f(t) = (p(t-1) - p(t-2)) / dt - f(t-1) + dt G
+p(t) = 2p(t-1) - p(t-2) + dt (f(t) - f(t-1)) + dt2G
 
 [p(t+1) - 2p(t) + p(t-1)] / dt^2 = c^2 [p(x+1) - 2p(x) + p(x-1)] / dx^2 
                                  + c^2 [p(y+1) - 2p(y) + p(y-1)] / dy^2 
 
 p(t+1) = 2p(t) - p(t-1) + dt^2c^2 [p(x+1) - 2p(x) + p(x-1)] / dx^2 
                         + dt^2c^2 [p(y+1) - 2p(y) + p(y-1)] / dy^2 
+
+Source term
+p(t+1) - p(t) = f(t+1) - f(t)
+p(t+1) = p(t) + f(t+1) - f(t)
 
 Open Boundary Conditions:
 dp/dt = +- c dp/dn
@@ -95,6 +110,18 @@ or
 
 dp/dt = \alpha dt/dt  // Really? no negative sign?
 dp2/dt2 = \alpha dp/dt
+
+
+RK-4 th order:
+----------------
+ y1 = y0 + (⅙) (k1 + 2k2 + 2k3 + k4)
+
+Here,
+
+k1 = hf(x0, y0)
+k2 = hf[x0 + (½)h, y0 + (½)k1]
+k3 = hf[x0 + (½)h, y0 + (½)k2]
+k4 = hf(x0 + h, y0 + k3) 
 */
 varying vec2 vUv;
 uniform float time;
@@ -227,18 +254,19 @@ void main()	{
 
   vec4 timeParts = 2.0 * p1 - p0;
   float f = textSourceFreq * (pow(2.0, source.w) - 1.0);
-  float mouseSourceParts = dt2 * float(d < (length(dxdy) * 1.0)) * float(source.z > 0.0) * f * f * 39.47841 * cos(6.283185 * time * f);
-  float mouseSourceParts2 =  textSourceAmp * source.z * dt2 * float(d < (length(dxdy) * 1.0)) * f * f * 39.47841 * sin(6.283185 * time * f);
+  float mouseSourceParts = float(d < (length(dxdy) * 1.0)) * float(source.z > 0.0) * sin(6.283185 * time * f);
+  float mouseSourceParts2 =  textSourceAmp * source.z * float(d < (length(dxdy) * 1.0)) * cos(6.283185 * time * f);
   // use the transparency to keep track of the amplitude
   vec4 sourceParts = vec4(source.w * mouseSourceParts, mouseSourceParts, source.z * textSourceAmp * mouseSourceParts, mouseSourceParts2);
   
   f = textSourceFreq * (pow(2.0, wall.x) - 1.0);
-  sourceParts.y += dt2 * float(wall.y > 0.05) * 39.47841 * f * f * cos(6.283185 * (time * f + wall.z));
+  sourceParts.y += float(wall.y > 0.05) * sin(6.283185 * (time * f + wall.z));
   sourceParts.x += wall.x * sourceParts.y;
   sourceParts.z += wall.y * textSourceAmp * sourceParts.y;
-  sourceParts.w += wall.y * textSourceAmp * dt2 * float(wall.y > 0.05) * 39.47841 * f * f * sin(6.283185 * (time * f + wall.z));
+  sourceParts.w += wall.y * textSourceAmp * dt2 * float(wall.y > 0.05) * cos(6.283185 * (time * f + wall.z));
   vec4 absorp = dt * edgeAlpha * (p1 - p0) + absorpCoeff * dt2c2 * (p1up - p1) / (dz * dz);
-  vec4 p = timeParts + dt2c2 * (xParts + yParts + zParts) + sourceParts + absorp;
+  vec4 p = timeParts + dt2c2 * (xParts + yParts + zParts) + absorp;
+  p = p * float(sourceParts.y == 0.0) + sourceParts * float(sourceParts.y != 0.0); 
 
   gl_FragColor = p;
 }

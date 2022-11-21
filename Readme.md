@@ -19,7 +19,9 @@ Website: https://empeeu.github.io/sound-painter/
        * [x] Add another SVG container as an overlay for the plot
     * [x] need an overlay to show where you are drawing the line
     * [x] import png
-    * [ ] Fix source term amplitudes
+    * [x] Fix source term amplitudes
+        * [ ] Switch to RK-4 integration
+        
     * [ ] Go to higher order numerics
     * [ ] Set up state in JSOn format so we can reload as needed
        * [ ] Rework the data structure
