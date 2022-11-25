@@ -3,23 +3,68 @@
 var simTime = 0;
 var startTime = 0;
 var fpsOutput = document.getElementById("FPS");
-var fps = 0;
+var fps = baselineFramerate * document.getElementById("simSpeed").value, 
+    framesThisSecond = 0,
+    lastFpsUpdate = 0;
+var frameId;
 var i = 0;
-function render() {
+var lastFrameTimeMs = 0;
+var deltaTime = 0;
+function render(timestamp) {
     if (!doRunSim) {
         return;
     }
-    setTimeout(function () {
-        requestAnimationFrame(render);
-    }, Math.max(0, 1000 / 30 - (Date.now() - startTime)));
-    //Make the plane rotate on plane axes
-    //mainPlaneObject.rotation.z += 0.02;
-    //mainPlaneObject.rotation.x += 0.01;
-    fps = 0.9 * fps + 0.05 * (1000 / (Date.now() - startTime));
-    fpsOutput.innerText = Math.round(fps) + ' TIME: ' + Math.round(simTime * 100) / 100;
-    startTime = Date.now();
-    //Render onto our off screen texture
-    for (var j = 0; j < 1; j++) {
+    let simSpeed = document.getElementById("simSpeed").value;
+    let timestep = 1000 / baselineFramerate / simSpeed;
+    if (timestamp < (lastFrameTimeMs + (1000 / baselineFramerate / simSpeed))) {
+        frameId = requestAnimationFrame(render);
+        return;
+    }
+    deltaTime += timestamp - lastFrameTimeMs;
+    lastFrameTimeMs = timestamp;
+    
+    // compute FPS
+    if (timestamp > lastFpsUpdate + 1000) { // updates every second
+        let omega = 0.5;
+        fps = omega * framesThisSecond + (1 - omega) * fps;
+        lastFpsUpdate = timestamp;
+        framesThisSecond = 0;
+        fpsOutput.innerText = Math.round(fps) + ' TIME: ' + Math.round(simTime * 100) / 100;
+    }
+    framesThisSecond ++;
+    i = 0;
+    while ((deltaTime >= timestep)){
+        updateFrameData(timestep);
+        deltaTime -= timestep;
+        i ++;
+        if (i > Math.max(simSpeed * 2, 10)){  // Panic!
+            deltaTime = 0; 
+            i = 0;
+            document.getElementById("simSpeed").value = max(1, simSpeed - 1);
+            break;
+        }
+    }
+    // console.log(i + " deltaTime: " + deltaTime);
+    // deltaTime = 0;
+
+    //Finally, draw to the screen
+    uniforms2.pI.value = textureRing[2].texture;
+    renderer.setRenderTarget(null);
+    renderer.render(scene, camera);
+
+    if (mouseProbe){        
+        plotPressure(document.getElementById("plotXlims").value,
+                     document.getElementById("plotYlims").value);
+        updateLabels(5,
+                     document.getElementById("plotXlims").value,
+                     document.getElementById("plotYlims").value);
+    }
+    frameId = requestAnimationFrame(render);
+    
+}
+
+function updateFrameData(){
+        //Render onto our off screen texture
         simTime += dt;
         renderer.setRenderTarget(textureRing[2]);
         renderer.render(bufferScene, camera);
@@ -28,24 +73,11 @@ function render() {
         uniforms.p0I.value = textureRing[0].texture;
         uniforms.p1I.value = textureRing[1].texture;
         uniforms.walls.value = drawingTexture;
-    }
-
-    //Finally, draw to the screen
-    uniforms2.pI.value = textureRing[2].texture;
-    renderer.setRenderTarget(null);
-    renderer.render(scene, camera);
-    i += 1;
-
-    // Update probe if needed
-    if (mouseProbe){
-        mouseProbeUpdate();
         
-        plotPressure(document.getElementById("plotXlims").value,
-                     document.getElementById("plotYlims").value);
-        updateLabels(5,
-                     document.getElementById("plotXlims").value,
-                     document.getElementById("plotYlims").value);
-    }
+        // Update probe if needed
+        if (mouseProbe){
+            mouseProbeUpdate();
+        }
 }
 // render();
 var doRunSim = false;
@@ -55,10 +87,12 @@ function startStopRender() {
         // Already running, stop it
         button.innerText = "Start"
         doRunSim = false;
+        cancelAnimationFrame(frameId);
     } else {
         doRunSim = true;
         button.innerText = "Stop"
-        render();
+        lastFrameTimeMs = performance.now();
+        render(performance.now());
     }
 }
 startStopRender();

@@ -137,3 +137,7 @@ width: 100%; */
 #draw-line-width {
     width: 3em;
 }
+
+#simSpeed {
+    width: 2em;
+}

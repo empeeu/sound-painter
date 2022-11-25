@@ -38,3 +38,5 @@ Website: https://empeeu.github.io/sound-painter/
 * https://github.com/mrdoob/three.js/blob/master/examples/webgl_framebuffer_texture.html
 * https://29a.ch/2012/12/16/webgl-fluid-simulation
 * https://mofu-dev.com/en/blog/stable-fluids
+* For the mainloop.js https://www.isaacsukin.com/news/2015/01/detailed-explanation-javascript-game-loops-and-timing#wrapping-up
+* Flexbox, always: https://css-tricks.com/snippets/css/a-guide-to-flexbox/

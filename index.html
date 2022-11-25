@@ -51,10 +51,11 @@
     x: <label id="mouse-x"></label>, y: <label id="mouse-y"></label>, p: <label id="mouse-p"></label>
   </div>
   <div>
+    <label>Speed</label><input id="simSpeed" min="1" max="9" step="1" value="3" type="number">
     FPS: <label id="FPS"></label>
   </div>
   <div> 
-    <label>Show Overlay</label><input id="show-hide-overlay" type="checkbox" checked onchange="toggelShowHidState(document.getElementById('canvas-overlay'));"></label>
+    <label>Show Overlay</label><input id="show-hide-overlay" type="checkbox" checked onchange="toggelShowHideState(document.getElementById('canvas-overlay'), this);"></label>
     <input id="canvas-file-input" type="file" oninput="updateCanvasFromFile(this);">
   </div>
   <div id="pressureProbePlot">

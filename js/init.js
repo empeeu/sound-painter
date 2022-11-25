@@ -1,6 +1,9 @@
 // This is the HTML element that houses the threejs canvas
 var container = document.getElementById("container");
 
+/////////////////// Variables related to the event loop
+var baselineFramerate = 12;  
+
 /////////////////// This is for our Drawing CANVAS
 const drawStartPos = new THREE.Vector2();
 var drawColor = "#00000000";
@@ -147,3 +150,6 @@ if (document.getElementById('canvas-file-input').files.length > 0) {
     console.log("loading canvas image");
     updateCanvasFromFile(document.getElementById('canvas-file-input'));
 };
+
+// Toggle all the visual elements
+toggelShowHideState(document.getElementById('canvas-overlay'), document.getElementById("show-hide-overlay"));
