@@ -1,5 +1,24 @@
+// Initialize the main container
+function onResize(){
+
+    let sndptrContainer = document.getElementById('snd-ptr-container');
+    let sndptrContainerBG = document.getElementById('snd-ptr-container-bg');
+    if (sndptrContainerBG.offsetWidth / sndptrContainerBG.offsetHeight > sndptrDM.window.aspect){
+        sndptrContainer.style.width = sndptrContainerBG.offsetHeight * sndptrDM.window.aspect + "px";
+        sndptrContainer.style.height = sndptrContainerBG.offsetHeight + "px";
+        // console.log("greater than");
+    } else {
+        sndptrContainer.style.height = sndptrContainerBG.offsetWidth / sndptrDM.window.aspect + "px";
+        sndptrContainer.style.width = sndptrContainerBG.offsetWidth + "px";
+        // console.log("less than " + sndptrContainer.offsetWidth / sndptrDM.window.aspect); 
+    }
+}
+onResize();
+window.addEventListener('resize', onResize, true);
+    
 // This is the HTML element that houses the threejs canvas
 var container = document.getElementById("container");
+
 
 /////////////////// Variables related to the event loop
 var baselineFramerate = 12;  

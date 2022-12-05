@@ -5,7 +5,49 @@ body {
 :root {
     --amp-track-color: 'white';
     --phase-track-color: 'white';
+    --sound-create-width: 15px;
 }
+
+#snd-ptr-container-bg {
+    width:100vw;
+    height: 100vh;
+    background-color: black;
+    overflow:hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#snd-ptr-container {
+    width:100%;
+    height:100%;
+    background-color: white;
+    display: flex;
+    flex-direction: row;
+}
+
+#snd-ptr-ctrls-container {
+    height: 100%;
+    width:25%;
+    background-color: aliceblue;
+}
+
+#snd-ptr-col2 {
+    height:100%;
+    width:75%;
+}
+
+#snd-ptr-row1 {
+    width:100%;
+    height:75%;
+}
+
+#snd-ptr-row2 {
+    width:100%;
+    height:25%;
+    background-color: azure;
+}
+
 
 #canvas-container {
     /* position: fixed;
@@ -57,7 +99,7 @@ width: 100%; */
 #frequency-select::-webkit-slider-runnable-track {
     background-image: url("../static/frequencyRamp.png");
     background-size: contain;
-    height: 5px;
+    height: var(--sound-create-width);
     border-style: solid;
     border-width: 1px;
 }
@@ -65,7 +107,7 @@ width: 100%; */
 #frequency-select:focus::-webkit-slider-runnable-track {
     background-image: url("../static/frequencyRamp.png");
     background-size: contain;
-    height: 5px;
+    height: var(--sound-create-width);
     border-style: solid;
     border-width: 1px;
 }
@@ -73,7 +115,7 @@ width: 100%; */
 #frequency-select::-moz-range-track {
     background-image: url("../static/frequencyRamp.png");
     background-size: contain;
-    height: 5px;
+    height: var(--sound-create-width);
     border-style: solid;
     border-width: 1px;
 }
@@ -81,7 +123,7 @@ width: 100%; */
 #frequency-select::-ms-fill-lower {
     background-image: url("../static/frequencyRamp.png");
     background-size: contain;
-    height: 5px;
+    height: var(--sound-create-width);
     border-style: solid;
     border-width: 1px;
 }
@@ -89,7 +131,7 @@ width: 100%; */
 #frequency-select::-ms-fill-upper {
     background-image: url("../static/frequencyRamp.png");
     background-size: contain;
-    height: 5px;
+    height: var(--sound-create-width);
     border-style: solid;
     border-width: 1px;
 }
@@ -97,7 +139,7 @@ width: 100%; */
 #frequency-select:focus::-ms-fill-lower {
     background-image: url("../static/frequencyRamp.png");
     background-size: contain;
-    height: 5px;
+    height: var(--sound-create-width);
     border-style: solid;
     border-width: 1px;
 }
@@ -105,7 +147,7 @@ width: 100%; */
 #frequency-select:focus::-ms-fill-upper {
     background-image: url("/static/frequencyRamp.png");
     background-size: contain;
-    height: 5px;
+    height: var(--sound-create-width);
     border-style: solid;
     border-width: 1px;
 }
@@ -117,7 +159,7 @@ width: 100%; */
 
 #amplitude-select::-moz-range-track {
     background: var(--amp-track-color);
-    height: 5px;
+    height: var(--sound-create-width);
     border-style: solid;
     border-width: 1px;
 }
@@ -129,7 +171,7 @@ width: 100%; */
 
 #phase-select::-moz-range-track {
     background: var(--phase-track-color);
-    height: 5px;
+    height: var(--sound-create-width);
     border-style: solid;
     border-width: 1px;
 }

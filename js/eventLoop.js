@@ -40,7 +40,7 @@ function render(timestamp) {
         if (i > Math.max(simSpeed * 2, 10)){  // Panic!
             deltaTime = 0; 
             i = 0;
-            document.getElementById("simSpeed").value = max(1, simSpeed - 1);
+            document.getElementById("simSpeed").value = Math.max(1, simSpeed - 1);
             break;
         }
     }
