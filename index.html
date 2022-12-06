@@ -9,19 +9,7 @@
 </head>
 
 <body>
-  <div id="canvas-container">
-    <canvas id="drawing-canvas" height="512px" width="512px"></canvas>
-  </div>
-  <div id="canvas-overlay-container">
-    <img id="canvas-overlay" src="./static/circles.svg"> </img>
-  </div>
-  <div id="canvas-draw-overlay-container">
-    <svg id="canvas-draw-overlay" opacity="1.0" width="512px" height="512px"> 
-      <line id="draw-line-overlay-helper" x1="0" x2="256" y1="0" y2="512" stroke="rgb(255, 255, 255)" stroke-width="1" opacity="0"></line>
-    </svg>
-  </div>
-  <div id="container" style="width:512px; height:512px; margin:auto;">
-  </div>
+
   <div>
     <input onchange="updateDrawColor();" id="frequency-select" type="range" min=0.05 max=1 step=0.01 value=0.5 />
     <input onchange="updateDrawColor();" id="amplitude-select" type="range" min=0.05 max=1 step=0.01 value=0.5 />
@@ -58,8 +46,7 @@
     <label>Show Overlay</label><input id="show-hide-overlay" type="checkbox" checked onchange="toggelShowHideState(document.getElementById('canvas-overlay'), this);"></label>
     <input id="canvas-file-input" type="file" oninput="updateCanvasFromFile(this);">
   </div>
-  <div id="pressureProbePlot">
-  </div>
+
 
   <div id="snd-ptr-container-bg">
     <div id="snd-ptr-container">
@@ -67,8 +54,25 @@
 
       </div>
       <div id="snd-ptr-col2">
-        <div id="snd-ptr-row1"></div>        
-        <div id="snd-ptr-row2"></div>
+        <div id="snd-ptr-row1">
+          <div id="canvas-container">
+            <canvas id="drawing-canvas"></canvas>
+          </div>
+          <div id="canvas-overlay-container">
+            <img id="canvas-overlay" src="./static/circles.svg"> </img>
+          </div>
+          <div id="canvas-draw-overlay-container">
+            <svg id="canvas-draw-overlay" opacity="1.0" width="512px" height="512px">
+              <line id="draw-line-overlay-helper" x1="0" x2="256" y1="0" y2="512" stroke="rgb(255, 255, 255)" stroke-width="1"
+                opacity="0"></line>
+            </svg>
+          </div>
+          <div id="container">
+          </div>
+        </div>
+        <div id="snd-ptr-row2">
+          <!-- <div id="pressureProbePlot"></div> -->
+        </div>
       </div>
     </div>
   </div>

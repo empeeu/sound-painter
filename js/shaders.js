@@ -86,6 +86,7 @@ T^2 / P * d^2(p*)/dt^2 = c^2 / P * L^2 nabla^2 (p*)
 d^2(p*)/dt^2 = c^2 * L^2 / T^2 nabla^2 (p*)
 Let C = L/T = 343 to make c == 0
 To RE-Dimensionalize: p = p* * P, t = t* * T, x = x* * C * T
+                  OR: p = p* * P, t = t* * L / C, x = x* * L
 
 let q = dp/dt - f(t)
 
