@@ -1,7 +1,11 @@
 function setupProbePlot(){
     console.log("Setting up probe plot");
     // grab the container
+    let margin = 10;
     let probeContainer = document.getElementById("pressureProbePlot");
+    let parent = probeContainer.parentElement;
+    let myWidth = parent.offsetWidth - 2 * margin;
+    let myHeight = parent.offsetHeight;
 
     // Add buttons to control the xlims and ylims
     let xylims = document.createElement("div");
@@ -26,32 +30,31 @@ function setupProbePlot(){
     // The draw canvas has margins all around
     // the axes is a canvas ON TOP of the draw canvas -- more static
     // and takes up full container size
-    let margin = 50;
-    probeContainer.style.width = widthDomain + margin * 2 + 'px';
-    let probeContainerHeight = Math.round(widthDomain / 1.618);
+    probeContainer.style.width = myWidth + margin * 2 + 'px';
+    let probeContainerHeight = myHeight - margin * 2;
     probeContainer.style.height = probeContainerHeight + margin * 2 + 'px';
     // Add the container for the axis and axis labels
     let probeAxis = document.createElement("div");
     probeAxis.classList = ["plotAxis"];
     probeContainer.append(probeAxis);
     let svgContainer = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svgContainer.setAttribute("width", widthDomain + margin * 2);
+    svgContainer.setAttribute("width", myWidth + margin * 2);
     svgContainer.setAttribute("height", probeContainerHeight + margin * 2);
     probeAxis.append(svgContainer);
     // Centerline
     let centerLine = drawSvgLine(
-        [margin, widthDomain+margin],
+        [margin, myWidth+margin],
         [probeContainerHeight / 2 + margin, probeContainerHeight / 2 + margin],
         "rgb(50, 50, 50)",
         3);
     centerLine.id = "plotCenterline";
     svgContainer.append(centerLine); 
 
-    let ticks = drawTicks(5, widthDomain, probeContainerHeight, margin, 'rgb(0,0,0)', 1);
+    let ticks = drawTicks(5, myWidth, probeContainerHeight, margin, 'rgb(0,0,0)', 1);
     for (var i =0; i< ticks.length; i++){
         svgContainer.append(ticks[i]);
     }
-    let labels = drawTickLabels(5, widthDomain, probeContainerHeight, margin, "#888888FF", "plotTickLabel")
+    let labels = drawTickLabels(5, myWidth, probeContainerHeight, margin, "#888888FF", "plotTickLabel")
     for (var i =0; i< labels.length; i++){
         svgContainer.append(labels[i]);
     }
@@ -63,19 +66,19 @@ function setupProbePlot(){
     svgOverlay.style.top = margin + 'px';
     svgOverlay.style.left = margin + 'px';
     svgOverlay.style.height = probeContainerHeight + 'px';
-    svgOverlay.style.width = widthDomain + 'px';
+    svgOverlay.style.width = myWidth + 'px';
     let svgOverlayContainer = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svgOverlayContainer.id = "plotOverlay";
-    svgOverlayContainer.setAttribute("width", widthDomain + "px");
+    svgOverlayContainer.setAttribute("width", myWidth + "px");
     svgOverlayContainer.setAttribute("height", probeContainerHeight + "px");
     svgOverlay.append(svgOverlayContainer);
     let testLine = drawSvgLine(
-        [0, widthDomain],
+        [0, myWidth],
         [probeContainerHeight / 4, probeContainerHeight / 4],
         "rgba(256, 256, 50, 25)",
         8);
     let testLine2 = drawSvgLine(
-        [0, widthDomain],
+        [0, myWidth],
         [3*probeContainerHeight / 4, 3*probeContainerHeight / 4],
         "rgba(256, 256, 50, 25)",
         8);
@@ -89,16 +92,16 @@ function setupProbePlot(){
     probeCanvasContainer.style.left = margin + 'px';
     probeContainer.append(probeCanvasContainer);
     probeCanvasContainer.style.height = probeContainerHeight + 'px';
-    probeCanvasContainer.style.width = widthDomain + 'px';
+    probeCanvasContainer.style.width = myWidth + 'px';
     let probeCanvas = document.createElement("canvas");
-    probeCanvas.width = widthDomain + 'px';
+    probeCanvas.width = myWidth + 'px';
     probeCanvas.height = probeContainerHeight + 'px';
     probeCanvas.id = "probeCanvas";
     probeCanvasContainer.append(probeCanvas);
     // document.body.append(probeCanvas);
     probeCanvas = document.getElementById('probeCanvas');
     let canvasContext = probeCanvas.getContext('2d');
-    probeCanvas.width = widthDomain;
+    probeCanvas.width = myWidth;
     probeCanvas.height = probeContainerHeight;
     updateLabels(5, 1, 1, 1);
     return canvasContext;
@@ -190,6 +193,10 @@ function mouseProbeUpdate() {
     var mx = document.getElementById('mouse-x');
     var my = document.getElementById('mouse-y');
     var mp = document.getElementById('mouse-p');
+    let margin = 10;
+    let probeContainer = document.getElementById("pressureProbePlot");
+    let parent = probeContainer.parentElement;
+    let myWidth = parent.offsetWidth - 2 * margin;
     renderer.readRenderTargetPixels(
         textureRing[2],
         parseInt(mx.innerText),
@@ -198,7 +205,7 @@ function mouseProbeUpdate() {
     );
     mp.innerText = pressureBuf[2];
     pressureHist.push({val: pressureBuf[2], time: simTime});
-    if (pressureHist.length > widthDomain){
+    if (pressureHist.length > myWidth){
         pressureHist = pressureHist.slice(1, pressureHist.length);
     }
 }
