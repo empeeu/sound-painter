@@ -54,7 +54,7 @@ function setupProbePlot(){
     for (var i =0; i< ticks.length; i++){
         svgContainer.append(ticks[i]);
     }
-    let labels = drawTickLabels(5, myWidth, probeContainerHeight, margin, "#888888FF", "plotTickLabel")
+    let labels = drawTickLabels(5, myWidth, probeContainerHeight, margin, "#888888ff", "plotTickLabel")
     for (var i =0; i< labels.length; i++){
         svgContainer.append(labels[i]);
     }
@@ -130,6 +130,18 @@ function drawSvgText(x, y, fill, text, id, classNames) {
     return svgText;
 }
 
+function drawSvgRect(x, y, width, height, fill, id, classNames){
+    let svgRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    svgRect.setAttribute("x", x);
+    svgRect.setAttribute("y", y);
+    svgRect.setAttribute("width", width);
+    svgRect.setAttribute("height", height);
+    svgRect.setAttribute("fill", fill);
+    svgRect.id = id;
+    svgRect.classList = classNames;
+    return svgRect;
+}
+
 function drawTicks(n, width, height, margin, stroke, strokeWidth){
     let ticks = [];
     let dx = width / (n - 1);
@@ -158,12 +170,23 @@ function drawTickLabels(n, width, height, margin, fill, className){
     for (var i = 0; i < n; i++){
         let idh = "svgTickTextH" + i;
         let idv = "svgTickTextV" + i;
+        let idvr = "svgTickBoxV" + i;
+        let idhr = "svgTickBoxH" + i;
         let textv = i + "v";
         let texth = i + "h";
-        ht = drawSvgText(i * dx + m, height + m, fill, texth, idh, classNamesH);
         vt = drawSvgText(m, i * dy + m, fill, textv, idv, classNamesV);
+        let bbox = vt.getBBox();
+        console.log(bbox);
+        vtr = drawSvgRect(bbox.x, bbox.y, bbox.width, bbox.height, 'white', idvr, "plotTickLabelV")
+        labels.push(vtr);
         labels.push(vt);
-        labels.push(ht);
+        if (i > 0) {
+            ht = drawSvgText(i * dx + m, height + m, fill, texth, idh, classNamesH);
+            bbox = ht.getBBox();
+            htr = drawSvgRect(bbox.x, bbox.y, bbox.width, bbox.height, 'white', idhr, "plotTickLabelH")
+            labels.push(htr);
+            labels.push(ht);
+        }
     }
     return labels;
 }
@@ -173,9 +196,22 @@ function updateLabels(n, xlims, ylims){
     var timestep = xlims / (n - 1);
     for (var i = 0; i < n; i++){
         let ht = document.getElementById("svgTickTextV" + i);
+        let htr = document.getElementById("svgTickBoxV" + i);
         ht.innerHTML = Math.round((ylims - damp * i) * 1000) / 1000;
-        let vt = document.getElementById("svgTickTextH" + i);
-        vt.innerHTML = Math.round((-(n - i - 1) * timestep) * 100) / 100;
+        htr.setAttribute("width", ht.getBBox().width);
+        htr.setAttribute("height", ht.getBBox().height);
+        htr.setAttribute("x", ht.getBBox().x);
+        htr.setAttribute("y", ht.getBBox().y);
+        
+        if (i > 0) {
+            let vt = document.getElementById("svgTickTextH" + i);
+            let vtr = document.getElementById("svgTickBoxH" + i);
+            vt.innerHTML = Math.round((-(n - i - 1) * timestep) * 100) / 100;
+            vtr.setAttribute("width", vt.getBBox().width);
+            vtr.setAttribute("height", vt.getBBox().height);
+            vtr.setAttribute("x", vt.getBBox().x);
+            vtr.setAttribute("y", vt.getBBox().y);
+        }
     }
 }
 

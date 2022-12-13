@@ -9,9 +9,11 @@
 }
 
 .plotAxis {
-    background-color: whitesmoke;
+    background-color: rgba(245, 245, 245, 0);
     width: 100%;
     height: 100%;
+    z-index:2;
+    position: absolute;
     /* margin: -15px; */
 }
 
@@ -39,12 +41,12 @@
 }
 
 .plotTickLabelH {
-    translate: 0 1.5em;
+    translate: 0 -0.5em;
 }
 .plotTickLabelV {
     text-anchor: end;
-    translate: -0.5em;
-    text-align: right;
+    translate: 1.5em;
+    text-align: left;
 }
 
 
