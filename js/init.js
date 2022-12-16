@@ -35,7 +35,12 @@ function onResize(){
     let scaleH = sndptrRow1.offsetHeight / drawingCanvasContainer.height;
     let scaleW = sndptrRow1.offsetWidth / drawingCanvasContainer.width;
     sndptrRow1.style.transform = "scale(" + scaleW + ")";
+
+    // scale plot
+    let sndptrRow2 = document.getElementById("pressureProbePlot");
+    sndptrRow2.style.transform = "scale(" + scaleW + ")";
 }
+
 onResize();
 window.addEventListener('resize', onResize, true);
 

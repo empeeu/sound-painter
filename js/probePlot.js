@@ -1,11 +1,11 @@
 function setupProbePlot(){
     console.log("Setting up probe plot");
     // grab the container
-    let margin = 10;
+    let margin = 0;
     let probeContainer = document.getElementById("pressureProbePlot");
     let parent = probeContainer.parentElement;
-    let myWidth = parent.offsetWidth - 2 * margin;
-    let myHeight = parent.offsetHeight;
+    let myWidth = Math.round(parseInt(rs.getPropertyValue('--canvas-height')) * sndptrDM.window.aspect) - 2 * margin;
+    let myHeight = Math.round(parseInt(rs.getPropertyValue('--canvas-height')) / 3) - 2 * margin;
 
     // Add buttons to control the xlims and ylims
     let xylims = document.createElement("div");
@@ -146,7 +146,7 @@ function drawTicks(n, width, height, margin, stroke, strokeWidth){
     let ticks = [];
     let dx = width / (n - 1);
     let dy = height / (n - 1);
-    let tl = 5;
+    let tl = 20;
     let m = margin;
     for (var i = 0; i < n; i++){
         vt = drawSvgLine([i * dx + m, i * dx + m], [height / 2 - tl + m, height / 2 + tl + m], stroke, strokeWidth);
@@ -174,14 +174,16 @@ function drawTickLabels(n, width, height, margin, fill, className){
         let idhr = "svgTickBoxH" + i;
         let textv = i + "v";
         let texth = i + "h";
-        vt = drawSvgText(m, i * dy + m, fill, textv, idv, classNamesV);
-        let bbox = vt.getBBox();
-        console.log(bbox);
-        vtr = drawSvgRect(bbox.x, bbox.y, bbox.width, bbox.height, 'white', idvr, "plotTickLabelV")
-        labels.push(vtr);
-        labels.push(vt);
+        if ((i > 0) & (i < n - 1)) {
+            vt = drawSvgText(m, i * dy + m, fill, textv, idv, classNamesV);
+            let bbox = vt.getBBox();
+            console.log(bbox);
+            vtr = drawSvgRect(bbox.x, bbox.y, bbox.width, bbox.height, 'white', idvr, "plotTickLabelV")
+            labels.push(vtr);
+            labels.push(vt);
+        }
         if (i > 0) {
-            ht = drawSvgText(i * dx + m, height + m, fill, texth, idh, classNamesH);
+            ht = drawSvgText(i * dx + m, height / 2 + m, fill, texth, idh, classNamesH);
             bbox = ht.getBBox();
             htr = drawSvgRect(bbox.x, bbox.y, bbox.width, bbox.height, 'white', idhr, "plotTickLabelH")
             labels.push(htr);
@@ -195,14 +197,15 @@ function updateLabels(n, xlims, ylims){
     var damp = (ylims / (n - 1)) * 2;
     var timestep = xlims / (n - 1);
     for (var i = 0; i < n; i++){
-        let ht = document.getElementById("svgTickTextV" + i);
-        let htr = document.getElementById("svgTickBoxV" + i);
-        ht.innerHTML = Math.round((ylims - damp * i) * 1000) / 1000;
-        htr.setAttribute("width", ht.getBBox().width);
-        htr.setAttribute("height", ht.getBBox().height);
-        htr.setAttribute("x", ht.getBBox().x);
-        htr.setAttribute("y", ht.getBBox().y);
-        
+        if ((i > 0) & (i < n - 1)) {
+            let ht = document.getElementById("svgTickTextV" + i);
+            let htr = document.getElementById("svgTickBoxV" + i);
+            ht.innerHTML = Math.round((ylims - damp * i) * 1000) / 1000;
+            htr.setAttribute("width", ht.getBBox().width);
+            htr.setAttribute("height", ht.getBBox().height);
+            htr.setAttribute("x", ht.getBBox().x);
+            htr.setAttribute("y", ht.getBBox().y);
+        }
         if (i > 0) {
             let vt = document.getElementById("svgTickTextH" + i);
             let vtr = document.getElementById("svgTickBoxH" + i);

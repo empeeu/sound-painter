@@ -1,11 +1,6 @@
 #pressureProbePlot {
     position: absolute;
-    /* margin-left: auto;
-    margin-right: auto;
-    left: 0px;
-    right: 0px; */
-    /* border: solid; */
-    /* padding: 50px; */
+    transform-origin: 0 0;
 }
 
 .plotAxis {
@@ -41,12 +36,12 @@
 }
 
 .plotTickLabelH {
-    translate: 0 -0.5em;
+    translate: -0.1em 0.75em;
+    text-anchor: end;
 }
 .plotTickLabelV {
     text-anchor: end;
-    translate: 1.5em;
-    text-align: left;
+    translate: 3em;
 }
 
 
