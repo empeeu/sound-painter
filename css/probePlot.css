@@ -46,8 +46,34 @@
 
 
 #plotXYLims {
-    position: absolute;
-    padding: 1em;
+    /* position: absolute; */
+    padding: 0.25em;
+    font-size: larger;
+
+}
+
+#plotYlims {
+    width: 3em;
+    font-size: larger;
+}
+
+#plotXlims {
+    width: 3em;
+    font-size: larger;
+
+}
+
+#plotYlimsLabel {
+    width: 5.2em;
+    font-size: larger;
+    display: inline-block;
+}
+
+#plotXlimsLabel {
+    width: 5.2em;
+    font-size: larger;
+    display: inline-block;
+
 }
 
 #plotOverlayContainer {

@@ -10,13 +10,18 @@ function setupProbePlot(){
     // Add buttons to control the xlims and ylims
     let xylims = document.createElement("div");
     xylims.innerHTML = `
-        <label>xlims</label>
-        <input id="plotXlims" type="number" min="0.1" max="0.7" step="0.1" value="0.5">
-        <label>ylims</label>
-        <input id="plotYlims" type="number" min="0.0" step="0.2" value="2">
+        <div>
+            <label id="plotXlimsLabel">Time</label>
+            <input id="plotXlims" type="number" min="0.1" max="0.7" step="0.1" value="0.5">
+        </div>
+        <div>
+            <label id="plotYlimsLabel">Amplitude</label>
+            <input id="plotYlims" type="number" min="0.0" step="0.2" value="2">
+        </div>
     `;
     xylims.id = "plotXYLims";
-    probeContainer.append(xylims);
+    let plotControlsContainer = document.getElementById("snd-ptr-plot-controls");
+    plotControlsContainer.append(xylims);
 
     // Strategy is as follows
     //  *********** Main container ******************

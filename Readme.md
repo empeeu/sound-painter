@@ -28,10 +28,11 @@ Website: https://empeeu.github.io/sound-painter/
     * [...] Fix Styling/Css -- better showing
       * [x] line draw overlay is messed-up -- figure it out...
       * [ ] fix the plot
-        * [ ] Need to seriously rework margins
-        * [ ] Probably need to move the axes scalers
-        * [ ] Work on a resize function
-      * [ ] fix the controls
+        * [x] Need to seriously rework margins
+        * [x] Work on a resize function
+        * [...] Probably need to move the axes scalers
+            * Move these to a "level-settings" box
+      * [ ] fix the controls (move to "user-controls" box)
     * [ ] Make an amplitude-colored shader
     * [ ] Set up state in JSOn format so we can reload as needed
        * [ ] Rework the data structure
