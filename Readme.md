@@ -13,21 +13,32 @@ Website: https://empeeu.github.io/sound-painter/
     * [x] fix mouse prober source
     * [x] Sound prober microphone
     * [x] Refactor
-    * [...] Make a oscilloscope for the sound prober
+    * [x] Make a oscilloscope for the sound prober
        * [x] Add title for time
        * [x] Add number inputs to change the x-y limits
        * [x] Add another SVG container as an overlay for the plot
     * [x] need an overlay to show where you are drawing the line
     * [x] import png
     * [x] Fix source term amplitudes
-        * [ ] Switch to RK-4 integration
-        
-    * [ ] Go to higher order numerics
-    * [ ] Set up state in JSOn format so we can reload as needed
-       * [ ] Rework the data structure
+    * [x] Fix timeLoop    
     * [x] reset the pressure field
     * [x] Draw lines
-    * [ ] Start time at 0
+    * [x] Figure out dimensionality
+        * To RE-Dimensionalize current equations: p = p* * P, t = t* * T, x = x* * C * T
+    * [x] Fix Styling/Css -- better showing
+      * [x] line draw overlay is messed-up -- figure it out...
+      * [ ] fix the plot
+        * [x] Need to seriously rework margins
+        * [x] Work on a resize function
+        * [x] Probably need to move the axes scalers
+            * Move these to a "level-settings" box
+      * [x] fix the controls (move to "user-controls" box)
+    * [ ] Make an amplitude-colored shader
+       * [ ] Rework the data structure
+    * [ ] Go to higher order numerics
+        * [ ] Switch to RK-4 integration
+    * [ ] Set up state in JSOn format so we can reload as needed
+    * ~~[ ] Start time at 0~~
 
 
 # Useful references

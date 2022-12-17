@@ -9,61 +9,90 @@
 </head>
 
 <body>
-  <div id="canvas-container">
-    <canvas id="drawing-canvas" height="512px" width="512px"></canvas>
+  <div id="snd-ptr-container-bg">
+    <div id="snd-ptr-container">
+      <div id="snd-ptr-col1">
+        <div id="snd-ptr-user-controls">
+          <div>
+            <label>Frequency</label>
+            <input onchange="updateDrawColor();" id="frequency-select" type="range" min=0.05 max=1 step=0.01 value=0.5 />
+            <label>Amplitude</label>
+            <input onchange="updateDrawColor();" id="amplitude-select" type="range" min=0.05 max=1 step=0.01 value=0.5 />
+            <label>Phase</label>
+            <input onchange="updateDrawColor();" id="phase-select" type="range" min=0.05 max=1 step=0.01 value=0.5 />
+          </div>
+          <div>
+            <label> Draw Line-Width: <input id="draw-line-width" type=number min=1 max=50 value=1
+                onchange="drawWidth=parseInt(this.value);">
+          </div>
+          <div>
+            <label> Draw Free-Hand: </label><input type="checkbox" id="free-hand-draw" checked />
+          </div>
+          <div>
+            <button id="draw-wall" onclick="setDrawColor('#000000ff');">Wall</button>
+            <button id="draw-free-surface" onclick="setDrawColor('#ffffffff');">Free-Surface</button>
+          </div>
+          <div>
+            <button id="draw-erase" onclick="eraseColor();">Erase</button>
+            <button id="draw-erase-all" onclick="clearCanvas();">Erase All</button>
+            <button id="pressure-erase" onclick="pressureErase();">Erase Pressure Field</button>
+          </div>
+        </div>  <!-- End user controls -->
+        <div id="snd-ptr-level-settings">
+          <div>
+            <label>Absorption Coefficient: </label>
+            <input onchange="uniforms.absorpCoeff.value=this.value;" id="absorption-select" type="range" min=0 max=0.1 step=0.001 value=0 />
+          </div>
+          <button id="Start" onclick="startStopRender();">Start</button>
+          <button id="test-sound" onclick="mouseTestSound();">Mouse Sound OFF</button>
+          <div>
+            <label>Speed: </label><input id="simSpeed" min="1" max="9" step="1" value="3" type="number">
+          </div>
+          <div>
+            FPS: <label id="FPS"></label>
+          </div>
+          <div>
+            <button id="probe-sound" onclick="mouseProbeSound();">Mouse Probe OFF</button>
+          </div>
+          <div>
+            x: <label id="mouse-x"></label>, y: <label id="mouse-y"></label>, p: <label id="mouse-p"></label>
+          </div>
+          <div> 
+            <label>Show Overlay</label><input id="show-hide-overlay" type="checkbox" checked onchange="toggelShowHideState(document.getElementById('canvas-overlay'), this);"></label>
+            <input id="canvas-file-input" type="file" oninput="updateCanvasFromFile(this);">
+          </div>
+          <div id="snd-ptr-plot-controls"></div>
+        </div> <!-- End level settings -->
+      </div>
+      <div id="snd-ptr-col2">
+        <div id="snd-ptr-row1">
+          <div id="canvas-container">
+            <canvas id="drawing-canvas"></canvas>
+          </div>
+          <div id="canvas-overlay-container">
+            <img id="canvas-overlay" src="./static/circles.svg"> </img>
+          </div>
+          <div id="canvas-draw-overlay-container">
+            <svg id="canvas-draw-overlay" opacity="1.0" width="512px" height="512px">
+              <line id="draw-line-overlay-helper" x1="0" x2="256" y1="0" y2="512" stroke="rgb(255, 255, 255)" stroke-width="1"
+              opacity="0"></line>
+            </svg>
+          </div>
+          <div id="container">
+          </div>
+        </div>
+        <div id="snd-ptr-row2">
+          <div id="pressureProbePlot"></div>
+        </div>
+      </div>
+    </div>
   </div>
-  <div id="canvas-overlay-container">
-    <img id="canvas-overlay" src="./static/circles.svg"> </img>
-  </div>
-  <div id="canvas-draw-overlay-container">
-    <svg id="canvas-draw-overlay" opacity="1.0" width="512px" height="512px"> 
-      <line id="draw-line-overlay-helper" x1="0" x2="256" y1="0" y2="512" stroke="rgb(255, 255, 255)" stroke-width="1" opacity="0"></line>
-    </svg>
-  </div>
-  <div id="container" style="width:512px; height:512px; margin:auto;">
-  </div>
-  <div>
-    <input onchange="updateDrawColor();" id="frequency-select" type="range" min=0.05 max=1 step=0.01 value=0.5 />
-    <input onchange="updateDrawColor();" id="amplitude-select" type="range" min=0.05 max=1 step=0.01 value=0.5 />
-    <input onchange="updateDrawColor();" id="phase-select" type="range" min=0.05 max=1 step=0.01 value=0.5 />
-  </div>
-  <div>
-    <label>Absorption Coefficient: </label><input onchange="uniforms.absorpCoeff.value=this.value;" type="range" min=0
-      max=0.1 step=0.001 value=0 />
-  </div>
-
-  <div>
-    <button id="Start" onclick="startStopRender();">Start</button>
-    <label> Draw Line-Width<input id="draw-line-width" type=number min=1 max=50 value=1
-        onchange="drawWidth=parseInt(this.value);">
-      <label> Draw Free-Hand</label><input type="checkbox" id="free-hand-draw" checked />
-  </div>
-  <div>
-    <button id="draw-wall" onclick="setDrawColor('#000000ff');">Wall</button>
-    <button id="draw-free-surface" onclick="setDrawColor('#ffffffff');">Free-Surface</button>
-    <button id="draw-erase" onclick="eraseColor();">Erase</button>
-    <button id="draw-erase-all" onclick="clearCanvas();">Erase All</button>
-    <button id="pressure-erase" onclick="pressureErase();">Erase Pressure Field</button>
-    <button id="test-sound" onclick="mouseTestSound();">Mouse Sound OFF</button>
-  </div>
-  <div>
-    <button id="probe-sound" onclick="mouseProbeSound();">Mouse Probe OFF</button>
-    x: <label id="mouse-x"></label>, y: <label id="mouse-y"></label>, p: <label id="mouse-p"></label>
-  </div>
-  <div>
-    <label>Speed</label><input id="simSpeed" min="1" max="9" step="1" value="3" type="number">
-    FPS: <label id="FPS"></label>
-  </div>
-  <div> 
-    <label>Show Overlay</label><input id="show-hide-overlay" type="checkbox" checked onchange="toggelShowHideState(document.getElementById('canvas-overlay'), this);"></label>
-    <input id="canvas-file-input" type="file" oninput="updateCanvasFromFile(this);">
-  </div>
-  <div id="pressureProbePlot">
-  </div>
+  
 
   <script src="js/three.js"></script>
   
   <!-- Custom Code -->
+  <script src="js/data_model.js"></script>
   <script src="js/shaders.js"></script>
   <script src="js/utils.js"></script>
   <script src="./js/drawing.js"></script>

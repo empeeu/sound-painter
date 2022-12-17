@@ -1,5 +1,53 @@
+// Initialize the drawing canvas
+let rs = getComputedStyle(document.querySelector(":root"));
+let drawingCanvasContainer = document.getElementById("drawing-canvas");
+drawingCanvasContainer.width = Math.round(parseInt(rs.getPropertyValue('--canvas-height')) * sndptrDM.window.aspect);
+drawingCanvasContainer.height = parseInt(rs.getPropertyValue('--canvas-height'));
+// scale overlays
+let drawOverlay = document.getElementById("canvas-draw-overlay");
+drawOverlay.style.width = drawingCanvasContainer.width  + "px";
+drawOverlay.style.height = drawingCanvasContainer.height + "px";
+let canvasOverlayContainer = document.getElementById("canvas-overlay-container");
+canvasOverlayContainer.style.width = drawingCanvasContainer.width + "px";
+canvasOverlayContainer.style.height = drawingCanvasContainer.height + "px";
+let canvasDrawOverlayContainer = document.getElementById("canvas-draw-overlay-container");
+canvasDrawOverlayContainer.style.width = drawingCanvasContainer.width + "px";
+canvasDrawOverlayContainer.style.height = drawingCanvasContainer.height + "px";
+
+
+
+// Initialize the main container
+function onResize(){
+
+    let sndptrContainer = document.getElementById('snd-ptr-container');
+    let sndptrContainerBG = document.getElementById('snd-ptr-container-bg');
+    if (sndptrContainerBG.offsetWidth / sndptrContainerBG.offsetHeight > sndptrDM.window.aspect){
+        sndptrContainer.style.width = sndptrContainerBG.offsetHeight * sndptrDM.window.aspect + "px";
+        sndptrContainer.style.height = sndptrContainerBG.offsetHeight + "px";
+        // console.log("greater than");
+    } else {
+        sndptrContainer.style.height = sndptrContainerBG.offsetWidth / sndptrDM.window.aspect + "px";
+        sndptrContainer.style.width = sndptrContainerBG.offsetWidth + "px";
+        // console.log("less than " + sndptrContainer.offsetWidth / sndptrDM.window.aspect); 
+    }
+    // scale game window
+    let sndptrRow1 = document.getElementById("snd-ptr-row1");
+    let scaleH = sndptrRow1.offsetHeight / drawingCanvasContainer.height;
+    let scaleW = sndptrRow1.offsetWidth / drawingCanvasContainer.width;
+    sndptrRow1.style.transform = "scale(" + scaleW + ")";
+
+    // scale plot
+    let sndptrRow2 = document.getElementById("pressureProbePlot");
+    sndptrRow2.style.transform = "scale(" + scaleW + ")";
+}
+
+onResize();
+window.addEventListener('resize', onResize, true);
+
 // This is the HTML element that houses the threejs canvas
 var container = document.getElementById("container");
+container.style.width = drawingCanvasContainer.width + "px";
+container.style.height = drawingCanvasContainer.height + "px";
 
 /////////////////// Variables related to the event loop
 var baselineFramerate = 12;  

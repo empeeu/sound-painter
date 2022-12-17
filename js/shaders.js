@@ -74,6 +74,20 @@ sndptr["pressureFragmentShader"] = `
 Main equation on the interior
 d^2(p)/dt^2 = c^2 nabla^2 (p) + df/dt
 
+# consider scaling....
+p = Pa == N / m^2 == kg /(s^2 m)
+c_air = 343 m/s
+d^2(p)/dt^2 = kg / (s^4 m)
+c^2 nabla ^2 (p) = m^2/s^2 kg / (s^2 m) / m^2 =  kg / (s^4 m)  
+check out -- now choose non-dimensional groups
+We want p to be Order 1, so let p* = p/P
+Also, choose x* = x / L, and t* = t / T
+T^2 / P * d^2(p*)/dt^2 = c^2 / P * L^2 nabla^2 (p*)
+d^2(p*)/dt^2 = c^2 * L^2 / T^2 nabla^2 (p*)
+Let C = L/T = 343 to make c == 0
+To RE-Dimensionalize: p = p* * P, t = t* * T, x = x* * C * T
+                  OR: p = p* * P, t = t* * L / C, x = x* * L
+
 let q = dp/dt - f(t)
 
 dq / dt = c^2 nabla^2 (p)

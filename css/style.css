@@ -5,7 +5,78 @@ body {
 :root {
     --amp-track-color: 'white';
     --phase-track-color: 'white';
+    --sound-create-width: 15px;
+    --canvas-height: 512;
 }
+
+#snd-ptr-container-bg {
+    width:100vw;
+    height: 100vh;
+    background-color: black;
+    overflow:hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#snd-ptr-container {
+    width:100%;
+    height:100%;
+    background-color: white;
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+}
+
+#snd-ptr-col1 {
+    height: 100%;
+    width:25%;
+    background-color: aliceblue;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    /* margin: 0.5em; */
+}
+
+#snd-ptr-user-controls {
+    /* background-color: rgba(5, 73, 73, 0.315); */
+    /* height: 75%; */
+    margin: 0.5em;
+}
+
+#snd-ptr-user-controls div {
+    margin: 0.25em;
+}
+
+#snd-ptr-level-settings {
+    background-color: rgb(216, 219, 223);
+    margin: 0.5em;
+    /* height: 25%; */
+}
+
+#snd-ptr-plot-controls {
+    display: flex;
+    flex-direction: column;
+}
+
+#snd-ptr-col2 {
+    height:100%;
+    width:75%;
+    image-rendering: auto;
+}
+
+#snd-ptr-row1 {
+    width:100%;
+    height:75%;
+    transform-origin: 0 0;
+}
+
+#snd-ptr-row2 {
+    width:100%;
+    height:25%;
+    background-color: azure;
+}
+
 
 #canvas-container {
     /* position: fixed;
@@ -16,48 +87,62 @@ width: 100%; */
 #canvas-overlay-container
 {
     position: absolute;
-    margin-left: auto;
+    margin: 0;
+    padding: 0;
+    /* margin-left: auto;
     margin-right: auto;
-    margin-bottom: -512px;
-    left: 0px;
-    right: 0px;
+    margin-bottom: -512px; */
+    /* left: 0px;
+    right: 0px; */
     z-index: 0;
-    width: 512px;
-    height: 512px;
+    /* width: 100%;
+    height: 100%; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #canvas-draw-overlay-container
 {
     position: absolute;
-    margin-left: auto;
+    /* margin-left: auto;
     margin-right: auto;
     margin-bottom: -512px;
     left: 0px;
-    right: 0px;
+    right: 0px; 
     z-index: 0;
-    width: 512px;
-    height: 512px;
+    /* width: 512px;
+    height: 512px; */
+}
+
+#container {
+    /* margin:auto; */
 }
 
 #drawing-canvas {
     position: absolute;
-    margin-left: auto;
+    /* margin-left: auto;
     margin-right: auto;
     margin-bottom: -512px;
     left: 0px;
-    right: 0px;
+    right: 0px; */
     z-index: 1;
 }
 
+#canvas-draw-overlay {
+    height:512px;
+    width:512px;
+}
+
 #frequency-select {
-    width: 256px;
+    width: 100%;
     height: 20px;
 }
 
 #frequency-select::-webkit-slider-runnable-track {
     background-image: url("../static/frequencyRamp.png");
     background-size: contain;
-    height: 5px;
+    height: var(--sound-create-width);
     border-style: solid;
     border-width: 1px;
 }
@@ -65,7 +150,7 @@ width: 100%; */
 #frequency-select:focus::-webkit-slider-runnable-track {
     background-image: url("../static/frequencyRamp.png");
     background-size: contain;
-    height: 5px;
+    height: var(--sound-create-width);
     border-style: solid;
     border-width: 1px;
 }
@@ -73,7 +158,7 @@ width: 100%; */
 #frequency-select::-moz-range-track {
     background-image: url("../static/frequencyRamp.png");
     background-size: contain;
-    height: 5px;
+    height: var(--sound-create-width);
     border-style: solid;
     border-width: 1px;
 }
@@ -81,7 +166,7 @@ width: 100%; */
 #frequency-select::-ms-fill-lower {
     background-image: url("../static/frequencyRamp.png");
     background-size: contain;
-    height: 5px;
+    height: var(--sound-create-width);
     border-style: solid;
     border-width: 1px;
 }
@@ -89,7 +174,7 @@ width: 100%; */
 #frequency-select::-ms-fill-upper {
     background-image: url("../static/frequencyRamp.png");
     background-size: contain;
-    height: 5px;
+    height: var(--sound-create-width);
     border-style: solid;
     border-width: 1px;
 }
@@ -97,7 +182,7 @@ width: 100%; */
 #frequency-select:focus::-ms-fill-lower {
     background-image: url("../static/frequencyRamp.png");
     background-size: contain;
-    height: 5px;
+    height: var(--sound-create-width);
     border-style: solid;
     border-width: 1px;
 }
@@ -105,33 +190,37 @@ width: 100%; */
 #frequency-select:focus::-ms-fill-upper {
     background-image: url("/static/frequencyRamp.png");
     background-size: contain;
-    height: 5px;
+    height: var(--sound-create-width);
     border-style: solid;
     border-width: 1px;
 }
 
 #amplitude-select {
-    width: 256px;
+    width: 100%;
     height: 20px;
 }
 
 #amplitude-select::-moz-range-track {
     background: var(--amp-track-color);
-    height: 5px;
+    height: var(--sound-create-width);
     border-style: solid;
     border-width: 1px;
 }
 
 #phase-select {
-    width: 256px;
+    width: 100%;
     height: 20px;
 }
 
 #phase-select::-moz-range-track {
     background: var(--phase-track-color);
-    height: 5px;
+    height: var(--sound-create-width);
     border-style: solid;
     border-width: 1px;
+}
+
+#absorption-select {
+    width: 100%;
 }
 
 #draw-line-width {
