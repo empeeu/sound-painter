@@ -1,7 +1,7 @@
 function setupProbePlot(){
     console.log("Setting up probe plot");
     // grab the container
-    let margin = 0;
+    let margin = 5;
     let probeContainer = document.getElementById("pressureProbePlot");
     let parent = probeContainer.parentElement;
     let myWidth = Math.round(parseInt(rs.getPropertyValue('--canvas-height')) * sndptrDM.window.aspect) - 2 * margin;
@@ -247,7 +247,7 @@ function mouseProbeUpdate() {
         heightContainer - parseInt(my.innerText),
         1, 1, pressureBuf
     );
-    mp.innerText = pressureBuf[2];
+    mp.innerText = Math.round(pressureBuf[2] * 10000) / 10000;
     pressureHist.push({val: pressureBuf[2], time: simTime});
     if (pressureHist.length > myWidth){
         pressureHist = pressureHist.slice(1, pressureHist.length);

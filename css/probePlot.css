@@ -48,30 +48,31 @@
 #plotXYLims {
     /* position: absolute; */
     padding: 0.25em;
-    font-size: larger;
+    font-size: normal;
+    margin-left: auto;
 
 }
 
 #plotYlims {
     width: 3em;
-    font-size: larger;
+    font-size: normal;
 }
 
 #plotXlims {
     width: 3em;
-    font-size: larger;
+    font-size: normal;
 
 }
 
 #plotYlimsLabel {
     width: 5.2em;
-    font-size: larger;
+    font-size: normal;
     display: inline-block;
 }
 
 #plotXlimsLabel {
     width: 5.2em;
-    font-size: larger;
+    font-size: normals;
     display: inline-block;
 
 }
@@ -83,7 +84,13 @@
 
 #plotOverlay {
     border-color:lightgray;
-    border-width: 1px;
-    border-style: solid;
+    /* border-width: 1px;
+    border-style: solid; */
     opacity: 0.6;
+}
+
+#mouse-p {
+    text-align: right;
+    width: 4em;
+    display: inline-block;
 }
