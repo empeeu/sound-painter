@@ -33,10 +33,12 @@ Website: https://empeeu.github.io/sound-painter/
         * [x] Probably need to move the axes scalers
             * Move these to a "level-settings" box
       * [x] fix the controls (move to "user-controls" box)
-    * [ ] Make an amplitude-colored shader
-       * [ ] Rework the data structure
     * [ ] Go to higher order numerics
         * [ ] Switch to RK-4 integration
+    * [x] Add a shift key to draw straight lines
+        * Also fix the, go outside border then line ends problem;
+    * [ ] Make an amplitude-colored shader
+       * [ ] Rework the data structure
     * [ ] Set up state in JSOn format so we can reload as needed
     * ~~[ ] Start time at 0~~
 
