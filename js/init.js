@@ -144,6 +144,8 @@ uniforms = {
     p0I: { type: "t", value: pressureTexture0.texture },
     p1I: { type: "t", value: pressureTexture1.texture },
     source: { value: source },
+    sourceType: {value: sndptrDM.sourceType}, // 0 is hard, 1 is soft
+    BCType: {value: sndptrDM.BCType},
     dxdy: { value: dxdy },
     pxpy: { value: pxpy },
     domain: { value: domainSizeWorld },
