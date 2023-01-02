@@ -14,12 +14,19 @@ function setupCanvasDrawing() {
     var mouseSourceIsOn = false;
     var drawFreehand = false;
 
+    document.addEventListener('keydown', function(e) {
+        if (e.key === "Escape" | e.key === "Esc"){
+            paint = false;
+            lineOverlay.setAttribute("opacity", 0.0);
+        }
+    })
+
     drawingCanvas.addEventListener('pointerdown', function (e) {
 
         paint = true & !mouseSource;
         drawFreehand = document.getElementById('free-hand-draw').checked;
         mouseSourceIsOn = mouseSource;
-        if (paint) {
+        if (paint) {            
             drawingContext.beginPath();
             drawStartPos.set(e.offsetX, e.offsetY);
             if (!drawFreehand){
@@ -40,8 +47,27 @@ function setupCanvasDrawing() {
     drawingCanvas.addEventListener('pointermove', function (e) {
         if (paint & drawFreehand) draw(drawingContext, e.offsetX, e.offsetY);
         if (paint & !drawFreehand){
-            lineOverlay.setAttribute("x2", e.offsetX);
-            lineOverlay.setAttribute("y2", e.offsetY);
+            if (e.shiftKey){
+                let dx = drawStartPos.x - e.offsetX;
+                let dy = drawStartPos.y - e.offsetY;
+                let x, y;
+                if (Math.abs(dx) > 2 * Math.abs(dy)) {
+                    y = drawStartPos.y;
+                    x = e.offsetX;
+                } else if (Math.abs(dy) > 2 * Math.abs(dx)) {
+                    x = drawStartPos.x;
+                    y = e.offsetY;
+                } else { // 45 degrees case
+                    let da = Math.max(Math.abs(dx), Math.abs(dy));
+                    x = drawStartPos.x - da * Math.sign(dx);
+                    y = drawStartPos.y - da * Math.sign(dy);
+                }
+                lineOverlay.setAttribute("x2", x);
+                lineOverlay.setAttribute("y2", y);
+            } else {
+                lineOverlay.setAttribute("x2", e.offsetX);
+                lineOverlay.setAttribute("y2", e.offsetY);
+            }
         }
         if (mouseSource) {
             source.x = e.offsetX / widthContainer;
@@ -65,9 +91,17 @@ function setupCanvasDrawing() {
 
     drawingCanvas.addEventListener('pointerup', function (e) {
         if (paint) {
-            draw(drawingContext, e.offsetX, e.offsetY);
             if (!drawFreehand){
                 lineOverlay.setAttribute("opacity", 0.0);
+                if (e.shiftKey){ 
+                    draw(drawingContext,
+                         lineOverlay.getAttribute("x2"),
+                         lineOverlay.getAttribute("y2"));
+                } else {
+                    draw(drawingContext, e.offsetX, e.offsetY);
+                }
+            } else {
+                draw(drawingContext, e.offsetX, e.offsetY);
             }
         }
         if (mouseSource) source.z = 0
@@ -76,8 +110,9 @@ function setupCanvasDrawing() {
     });
 
     drawingCanvas.addEventListener('pointerleave', function () {
-
-        paint = false;
+        if (drawFreehand){
+            paint = false;
+        }
 
     });
 

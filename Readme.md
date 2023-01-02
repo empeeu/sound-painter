@@ -25,13 +25,22 @@ Website: https://empeeu.github.io/sound-painter/
     * [x] Draw lines
     * [x] Figure out dimensionality
         * To RE-Dimensionalize current equations: p = p* * P, t = t* * T, x = x* * C * T
-    * [...] Fix Styling/Css -- better showing
-    * [ ] Make an amplitude-colored shader
-    * [ ] Set up state in JSOn format so we can reload as needed
-       * [ ] Rework the data structure
+    * [x] Fix Styling/Css -- better showing
+      * [x] line draw overlay is messed-up -- figure it out...
+      * [ ] fix the plot
+        * [x] Need to seriously rework margins
+        * [x] Work on a resize function
+        * [x] Probably need to move the axes scalers
+            * Move these to a "level-settings" box
+      * [x] fix the controls (move to "user-controls" box)
     * [ ] Go to higher order numerics
         * [ ] Switch to RK-4 integration
-    * [ ] Start time at 0
+    * [x] Add a shift key to draw straight lines
+        * Also fix the, go outside border then line ends problem;
+    * [ ] Make an amplitude-colored shader
+       * [ ] Rework the data structure
+    * [ ] Set up state in JSOn format so we can reload as needed
+    * ~~[ ] Start time at 0~~
 
 
 # Useful references
