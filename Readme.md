@@ -33,12 +33,19 @@ Website: https://empeeu.github.io/sound-painter/
         * [x] Probably need to move the axes scalers
             * Move these to a "level-settings" box
       * [x] fix the controls (move to "user-controls" box)
-    * [ ] Go to higher order numerics
-        * [ ] Switch to RK-4 integration
     * [x] Add a shift key to draw straight lines
         * Also fix the, go outside border then line ends problem;
-    * [ ] Make an amplitude-colored shader
-       * [ ] Rework the data structure
+    * [...] Go to higher order numerics
+        * ~~[ ] Switch to RK-4 integration~~
+        * [ ] Go to 4th order FD for everything
+            * [ ] Check to see if we can swap out the shader on the fly
+            * [ ] Make a dropdown to select the shader type
+    * [...] Make an amplitude-colored shader
+    * [ ] Implement variable sound speed
+    * [ ] Create nice drawing icons and improve drawing system UX in general
+        * When you click a button it should remain active
+        * There should be drawing modes (wall, free surface, sound) and drawing tools (free hand, line, gradient)
+    * [ ] Rework the data structure
     * [ ] Set up state in JSOn format so we can reload as needed
     * ~~[ ] Start time at 0~~
 

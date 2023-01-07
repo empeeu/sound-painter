@@ -61,6 +61,7 @@
             <label>Show Overlay</label><input id="show-hide-overlay" type="checkbox" checked onchange="toggelShowHideState(document.getElementById('canvas-overlay'), this);"></label>
             <input id="canvas-file-input" type="file" oninput="updateCanvasFromFile(this);">
           </div>
+          <div><select id="shader-type-selector" onchange="updateActiveShader(event, this);"></select></div>
           <div id="snd-ptr-plot-controls"></div>
         </div> <!-- End level settings -->
       </div>

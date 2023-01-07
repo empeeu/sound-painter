@@ -64,6 +64,36 @@ void main()	{
 }
 `;
 
+//////////////////////////////////////////////////////////////////////////////////////
+// Shader that interprets the pressure and colors it based on amplitude
+//////////////////////////////////////////////////////////////////////////////////////
+
+sndptr["colorFragmentShaderAmplitude"] = `
+varying vec2 vUv;
+uniform sampler2D pI;
+vec3 HSVtoRGB(in vec3 HSV)
+{
+    float H   = HSV.x;
+    float R   = abs(H * 6.0 - 3.0) - 1.0;
+    float G   = 2.0 - abs(H * 6.0 - 2.0);
+    float B   = 2.0 - abs(H * 6.0 - 4.0);
+    vec3  RGB = clamp( vec3(R,G,B), 0.0, 1.0 );
+    return ((RGB - 1.0) * HSV.y + 1.0) * HSV.z;
+}
+void main()	{
+  vec4 p = texture2D(pI, vUv);
+  float hue = abs(p.w);
+  float sat = abs(p.w);
+  float val = (0.5 + min(1.0, max(-1.0, p.w)) * 0.8);
+  vec3 hsv = vec3(hue, sat, val);
+  vec3 prgb = HSVtoRGB(hsv);
+
+  //gl_FragColor = vec4(p, p*p, sin(p * 50.0), 1.0);
+  //gl_FragColor = vec4(p.x / 2.0 + 0.5, p.y / 2.0 + 0.5, p.z / 2.0 + 0.5, 1.0);
+  gl_FragColor = vec4(prgb, 1.0);
+  //gl_FragColor = vec4(p.z / 2.0 + 0.5, p.w / 2.0 + 0.5, 0.5, 1.0);
+}
+`;
 
 //////////////////////////////////////////////////////////////////////////////////////
 // Main pressure shader
@@ -783,4 +813,11 @@ void main()	{
 
 console.log("... done loading shaders.");
 
+
+function updateActiveShader(e, elem){
+  // todo
+  console.log("Updating shader");
+  console.log(e);
+  console.log();
+};
 

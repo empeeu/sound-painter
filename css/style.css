@@ -51,7 +51,7 @@ body {
 #snd-ptr-level-settings {
     background-color: rgb(216, 219, 223);
     margin: 0.5em;
-    /* height: 25%; */
+    overflow: scroll;
 }
 
 #snd-ptr-plot-controls {

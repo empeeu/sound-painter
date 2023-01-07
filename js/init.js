@@ -1,3 +1,15 @@
+// Populate UI elements
+function genShaderDropdown(){
+    let select = document.getElementById('shader-type-selector');
+
+    for (var i=0; i<=sndptrDMSpec.shader.values.length-1; i++){
+        let opt = document.createElement('option');
+        opt.value = sndptrDMSpec.shader.values[i];
+        opt.innerHTML = sndptrDMSpec.shader.display[i];
+    select.appendChild(opt);
+    }
+}
+genShaderDropdown();
 // Initialize the drawing canvas
 let rs = getComputedStyle(document.querySelector(":root"));
 let drawingCanvasContainer = document.getElementById("drawing-canvas");
