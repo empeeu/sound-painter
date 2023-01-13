@@ -175,7 +175,8 @@ uniforms = {
 var planeMaterial = new THREE.ShaderMaterial({
     uniforms: uniforms,
     vertexShader: sndptr.vertexShader,
-    fragmentShader: sndptr.pressureFragmentShader
+    // fragmentShader: sndptr.pressureFragmentShader
+    fragmentShader: sndptr.pressureFragmentShader4thOrder
     
 });
 // var planeMaterial = new THREE.MeshBasicMaterial({ color: 0x7074FF });
@@ -193,7 +194,7 @@ uniforms2 = {
 var planeMaterial2 = new THREE.ShaderMaterial({
     uniforms: uniforms2,
     vertexShader: sndptr.vertexShader,
-    fragmentShader: sndptr.colorFragmentShader
+    fragmentShader: sndptr.colorFragmentShaderAmplitude
 });
 var plane2 = new THREE.PlaneGeometry(widthContainer, heightContainer);
 var mainPlaneObject = new THREE.Mesh(plane2, planeMaterial2);

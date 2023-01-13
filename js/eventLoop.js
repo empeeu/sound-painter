@@ -66,13 +66,7 @@ function render(timestamp) {
 function updateFrameData(){
         //Render onto our off screen texture
         simTime += dt;
-        renderer.setRenderTarget(textureRing[2]);
-        renderer.render(bufferScene, camera);
-        uniforms.time.value = uniforms.time.value + dt;
-        textureRing = [textureRing[1], textureRing[2], textureRing[0]];
-        uniforms.p0I.value = textureRing[0].texture;
-        uniforms.p1I.value = textureRing[1].texture;
-        uniforms.walls.value = drawingTexture;
+        updateShaderUniforms(simTime);
         
         // Update probe if needed
         if (mouseProbe){
