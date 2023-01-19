@@ -162,6 +162,8 @@ function eraseColor() {
 }
 
 function pressureErase() {
+    simTime = 0;
+    initUniforms.time.value = simTime;
     renderer.setRenderTarget(pressureTexture0);
     renderer.render(initScene, camera);
     renderer.setRenderTarget(pressureTexture1);

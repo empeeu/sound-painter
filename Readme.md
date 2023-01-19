@@ -37,9 +37,10 @@ Website: https://empeeu.github.io/sound-painter/
         * Also fix the, go outside border then line ends problem;
     * [...] Go to higher order numerics
         * ~~[ ] Switch to RK-4 integration~~
-        * [ ] Go to 4th order FD for everything
-            * [ ] Check to see if we can swap out the shader on the fly
-            * [ ] Make a dropdown to select the shader type
+        * [...] Go to 4th order FD for everything
+            * [x] Check to see if we can swap out the shader on the fly
+            * [x] Make a dropdown to select the shader type
+            * [x] Debug  1/4 amplitude 
     * [...] Make an amplitude-colored shader
     * [ ] Implement variable sound speed
     * [ ] Create nice drawing icons and improve drawing system UX in general

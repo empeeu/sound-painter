@@ -27,7 +27,14 @@ void main()	{
 //////////////////////////////////////////////////////////////////////////////////////
 
 sndptr["initFragmentShader"] = `
+uniform float dt;
+uniform float time;
 void main()	{
+    // float pi = 6.283185*10.0;
+    // gl_FragColor = vec4(sin(pi * (time-dt * 4.0)), sin(pi * (time-dt * 3.0)), sin(pi * (time-dt * 2.0)), sin(pi * (time-dt * 1.0)));
+    // gl_FragColor = vec4(pow(time-dt * 3.0,2.0), pow(time-dt * 2.0, 2.0), pow(time-dt * 1.0, 2.0), pow(time-dt * 0.0, 2.0));
+    // gl_FragColor = vec4(1.0,2.0,3.0,4.0);
+    // gl_FragColor = vec4(1.0,2.0,3.0,time);
     gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
   }
 `;
@@ -402,7 +409,7 @@ k4 = hf(x0 + h, y0 + k3)
 varying vec2 vUv;
 uniform float time;
 uniform sampler2D p0I;
-uniform sampler2D p1I;
+// uniform sampler2D p1I;
 uniform vec4 source;  // source.xy is xy location of mouse. source.z = amplitude. source.w = frequency
 uniform vec2 dxdy;
 uniform vec2 pxpy;  // size of pixel in x and y directions, for a 1x1 domain
@@ -503,6 +510,17 @@ void main()
   p.y = p0.z;
   p.z = p0.w;
   p.w = 0.0;
+
+  // // float timeParts = 2.0 * p0.w - p0.z; 
+  // // p.w = timeParts + dt2 * 2.0;
+  // float timeParts = (104.0 * p0.w - 114.0 * p0.z + 56.0 * p0.y - 11.0 * p0.x) / 35.0;
+  // p.w = timeParts + 12.0 * dt2  / 35.0 * 2.0;
+  // gl_FragColor = p;
+  // return;
+  // /*
+
+
+
 
   // Need this for bc and source terms
   vec3 wallRGB = texture2D(walls, vUv).xyz;
@@ -814,9 +832,9 @@ void main()
   //// Compute absorption
   // Up down "edges"
   float p1up = (p0.w - dz / c / dt * (p0.w - p0.z));
-  float absorp = dt * edgeAlpha * (p0.w - p0.z) + absorpCoeff * dt2c2 * (p1up - p0.w) / (dz * dz);
+  float absorp = dt * edgeAlpha * (p0.w - p0.z) + absorpCoeff * dt2c2 * 12.0 / 35.0 * (p1up - p0.w) / (dz * dz);
 
-  p.w = timeParts + sourceParts + 12.0 * dt2c2 * (xparts + yparts) + absorp;
+  p.w = timeParts + sourceParts + 12.0 / 35.0 * dt2c2 * (xparts + yparts) + absorp;
 
   gl_FragColor = p;
 }

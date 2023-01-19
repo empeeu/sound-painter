@@ -233,7 +233,13 @@ function mouseProbeSound() {
     }
 }
 
-function mouseProbeUpdate() {
+function mouseProbeUpdate(i, j) {
+    if (i==undefined){
+        i = 0;
+    }
+    if (j ===undefined){
+        j = 3;
+    }
     var mx = document.getElementById('mouse-x');
     var my = document.getElementById('mouse-y');
     var mp = document.getElementById('mouse-p');
@@ -242,13 +248,13 @@ function mouseProbeUpdate() {
     let parent = probeContainer.parentElement;
     let myWidth = parent.offsetWidth - 2 * margin;
     renderer.readRenderTargetPixels(
-        textureRing[2],
+        textureRing[i],
         parseInt(mx.innerText),
         heightContainer - parseInt(my.innerText),
         1, 1, pressureBuf
     );
-    mp.innerText = Math.round(pressureBuf[2] * 10000) / 10000;
-    pressureHist.push({val: pressureBuf[2], time: simTime});
+    mp.innerText = Math.round(pressureBuf[j] * 10000) / 10000;
+    pressureHist.push({val: pressureBuf[j], time: simTime});
     if (pressureHist.length > myWidth){
         pressureHist = pressureHist.slice(1, pressureHist.length);
     }

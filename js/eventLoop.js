@@ -48,7 +48,7 @@ function render(timestamp) {
     // deltaTime = 0;
 
     //Finally, draw to the screen
-    uniforms2.pI.value = textureRing[2].texture;
+    uniforms2.pI.value = textureRing[0].texture;
     renderer.setRenderTarget(null);
     renderer.render(scene, camera);
 
@@ -89,4 +89,5 @@ function startStopRender() {
         render(performance.now());
     }
 }
+pressureErase();  // Initializes pressure
 startStopRender();

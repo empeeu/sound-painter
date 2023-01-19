@@ -6,7 +6,7 @@ function genShaderDropdown(){
         let opt = document.createElement('option');
         opt.value = sndptrDMSpec.shader.values[i];
         opt.innerHTML = sndptrDMSpec.shader.display[i];
-    select.appendChild(opt);
+        select.appendChild(opt);
     }
 }
 genShaderDropdown();
@@ -62,7 +62,7 @@ container.style.width = drawingCanvasContainer.width + "px";
 container.style.height = drawingCanvasContainer.height + "px";
 
 /////////////////// Variables related to the event loop
-var baselineFramerate = 12;  
+var baselineFramerate = 12;
 
 /////////////////// This is for our Drawing CANVAS
 const drawStartPos = new THREE.Vector2();
@@ -95,40 +95,28 @@ var heightDomain = heightContainer;
 
 var pressureTexture0 = new THREE.WebGLRenderTarget(
     widthDomain, heightDomain, {
-        minFilter: THREE.LinearFilter,
-        magFilter: THREE.NearestFilter,
-        type: THREE.FloatType,
-        // format: THREE.RedFormat
-    });
-    var pressureTexture1 = new THREE.WebGLRenderTarget(
-        widthDomain, heightDomain, {
-            minFilter: THREE.LinearFilter,
-            magFilter: THREE.NearestFilter,
-            type: THREE.FloatType,
-            // format: THREE.RedFormat
-            
-        });
-        var pressureTexture2 = new THREE.WebGLRenderTarget(
-            widthDomain, heightDomain, {
-                minFilter: THREE.LinearFilter,
-                magFilter: THREE.NearestFilter,
-                type: THREE.FloatType,
-                // format: THREE.RedFormat
-            });
-            
-            var textureRing = [pressureTexture0, pressureTexture1, pressureTexture2];
-            
-            // Create an initialization shader 
-            var initMaterial = new THREE.ShaderMaterial({
-                vertexShader: sndptr.vertexShader,
-                fragmentShader: sndptr.initFragmentShader
-            });
-            // var planeMaterial = new THREE.MeshBasicMaterial({ color: 0x7074FF });
-/// We attach this shader to a plane and add it to our buffer scne
-var initPlane = new THREE.PlaneGeometry(widthContainer, heightContainer);
-var initPlaneObject = new THREE.Mesh(initPlane, initMaterial);
-initPlaneObject.position.z = 0;
-initScene.add(initPlaneObject);//We add it to the bufferScene instead of the normal scene!
+    minFilter: THREE.LinearFilter,
+    magFilter: THREE.NearestFilter,
+    type: THREE.FloatType,
+    // format: THREE.RedFormat
+});
+var pressureTexture1 = new THREE.WebGLRenderTarget(
+    widthDomain, heightDomain, {
+    minFilter: THREE.LinearFilter,
+    magFilter: THREE.NearestFilter,
+    type: THREE.FloatType,
+    // format: THREE.RedFormat
+
+});
+var pressureTexture2 = new THREE.WebGLRenderTarget(
+    widthDomain, heightDomain, {
+    minFilter: THREE.LinearFilter,
+    magFilter: THREE.NearestFilter,
+    type: THREE.FloatType,
+    // format: THREE.RedFormat
+});
+
+var textureRing = [pressureTexture0, pressureTexture1, pressureTexture2];
 
 // Now create the supporing data
 // initial pressure source
@@ -149,6 +137,24 @@ var pxpy = new THREE.Vector2(1 / widthDomain, 1 / heightDomain);
 
 var c = 1.0;  // speed of sound
 var dt = 0.95 / Math.sqrt(2) * Math.min(dxdy.x, dxdy.y) / c;
+
+// Create an initialization shader 
+var initUniforms = {
+    dt : {value: dt},
+    time: {value: 0.0}
+}
+var initMaterial = new THREE.ShaderMaterial({
+    vertexShader: sndptr.vertexShader,
+    fragmentShader: sndptr.initFragmentShader,
+    uniforms: initUniforms
+});
+// var planeMaterial = new THREE.MeshBasicMaterial({ color: 0x7074FF });
+/// We attach this shader to a plane and add it to our buffer scne
+var initPlane = new THREE.PlaneGeometry(widthContainer, heightContainer);
+var initPlaneObject = new THREE.Mesh(initPlane, initMaterial);
+initPlaneObject.position.z = 0;
+initScene.add(initPlaneObject);//We add it to the bufferScene instead of the normal scene!
+
 
 ///Create the uniforms for the computations
 uniforms = {
@@ -175,9 +181,8 @@ uniforms = {
 var planeMaterial = new THREE.ShaderMaterial({
     uniforms: uniforms,
     vertexShader: sndptr.vertexShader,
-    // fragmentShader: sndptr.pressureFragmentShader
-    fragmentShader: sndptr.pressureFragmentShader4thOrder
-    
+    fragmentShader: sndptr.pressureFragmentShader
+
 });
 // var planeMaterial = new THREE.MeshBasicMaterial({ color: 0x7074FF });
 /// We attach this shader to a plane and add it to our buffer scne
