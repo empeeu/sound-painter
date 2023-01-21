@@ -477,7 +477,7 @@ float computeBCsAcc1(int BCType, vec4 p, vec4 pp1, float dn, float dt, float c, 
 {
   float pbc = 0.0;
   if (BCType == 0) { // Open boundary condition
-    return (p.w - p.z) / (c * dt) * dn + sgn * p.w;
+    return -(p.w - p.z) / (c * dt) * dn + sgn * p.w;
   }
   if (BCType == 1) { // Rigid Wall
     return 0.0;
@@ -678,7 +678,7 @@ void main()
       pw = texture2D(p0I, vUv * vec2(0, 1) + vec2(1, 0));
     }
     if (onWestEdge > 0) {
-      pw.w = computeBCsAcc1(onWestEdge - 1, p0, pw, dx, dt, c, -1.0);
+      pw.w = computeBCsAcc1(onWestEdge - 1, p0, pw, dx, dt, c, 1.0);
     } else {
       pw = texture2D(p0I, vUv - offset * vec2(pxpy.x, 0));
     }
@@ -763,7 +763,7 @@ void main()
       ps = texture2D(p0I, vUv * vec2(1, 0) + vec2(0, 1));
     }
     if (onSouthEdge > 0) {
-      ps.w = computeBCsAcc1(onSouthEdge - 1, p0, ps, dy, dt, c, -1.0);
+      ps.w = computeBCsAcc1(onSouthEdge - 1, p0, ps, dy, dt, c, 1.0);
     } else {
       ps = texture2D(p0I, vUv - offset * vec2(0, pxpy.y));
     }
