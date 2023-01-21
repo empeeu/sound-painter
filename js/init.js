@@ -136,7 +136,7 @@ var dxdy = new THREE.Vector2(domainSizeWorld.x / widthDomain, domainSizeWorld.y 
 var pxpy = new THREE.Vector2(1 / widthDomain, 1 / heightDomain);
 
 var c = 1.0;  // speed of sound
-var dt = 0.95 / Math.sqrt(2) * Math.min(dxdy.x, dxdy.y) / c;
+var dt = 0.95 / Math.sqrt(2) * Math.min(dxdy.x, dxdy.y) / c / 2;
 
 // Create an initialization shader 
 var initUniforms = {
@@ -173,7 +173,7 @@ uniforms = {
         type: "t",
         value: drawingTexture
     },
-    textSourceAmp: { value: 5.0 },
+    textSourceAmp: { value: 1.0 },
     textSourceFreq: { value: widthDomain / 8 },
     absorpCoeff: { value: 0.0 }
 };

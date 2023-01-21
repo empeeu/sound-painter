@@ -6,7 +6,7 @@ sndptrDM = {
         aspect: 16/9
     },
     // Properties related to the shader
-    sourceType: 1, // 0 is hard, 1 is soft
+    sourceType: 0, // 0 is hard, 1 is soft
     edgeBCType: 0, // 0: open, 1: ridgid, 2: free, 3: periodic
     shader: "Amplitude4th"
 };
