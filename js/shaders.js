@@ -661,7 +661,7 @@ void main()
 
   // TODO, think about corners
   //// Do the d2/dx2 derivatives
-  if (true)//((onEastEdge > 0) || (nearEastEdge > 0)) && ((onWestEdge > 0) || (nearWestEdge > 0))) 
+  if (((onEastEdge > 0) || (nearEastEdge > 0)) && ((onWestEdge > 0) || (nearWestEdge > 0))) 
   {
     // we have to do 2nd order stencil with low order boundary estimation
     // East Edge
@@ -712,7 +712,7 @@ void main()
       pwww = texture2D(p0I, vUv - 3.0 * offset * vec2(pxpy.x, 0));
       pwwww = texture2D(p0I, vUv - 4.0 * offset * vec2(pxpy.x, 0));
       pe.w = computeBCsAcc4(onEastEdge - 1, p0, pw, pww, pwww, pwwww, dx, dt, c, 1.0);
-      xparts = stencilSkewOrd2Acc5(pwwww.w, pwww.w, pww.w, pw.w, p.w, pe.w, dx2);
+      xparts = stencilSkewOrd2Acc5(pwwww.w, pwww.w, pww.w, pw.w, p0.w, pe.w, dx2);
     } else if(nearEastEdge > 0) {
       pw = texture2D(p0I, vUv - offset * vec2(pxpy.x, 0));
       pww = texture2D(p0I, vUv - 2.0 * offset * vec2(pxpy.x, 0));
@@ -746,7 +746,7 @@ void main()
   }
   
   //// Do the d2/dy2 derivatives
-  if (true) //((onNorthEdge > 0) || (nearNorthEdge > 0)) && ((onSouthEdge > 0) || (nearSouthEdge > 0))) 
+  if (((onNorthEdge > 0) || (nearNorthEdge > 0)) && ((onSouthEdge > 0) || (nearSouthEdge > 0))) 
   {
     // we have to do end order stencil with low order boundary estimation
     // North Edge
@@ -779,7 +779,7 @@ void main()
       pn = texture2D(p0I, vUv * vec2(1, 0));
       pnn =  texture2D(p0I, vUv * vec2(1, 0) + vec2(0, pxpy.y));
     } else if (nearNorthEdge == 4){ // Periodic
-          pnn =  texture2D(p0I, vUv * vec2(1, 0) + vec2(0, pxpy.y));
+      pnn =  texture2D(p0I, vUv * vec2(1, 0) + vec2(0, pxpy.y));
     }
     // South Edge
     if (onSouthEdge == 4){  // Periodic
@@ -826,7 +826,7 @@ void main()
       pss = texture2D(p0I, vUv - 2.0 * offset * vec2(0, pxpy.y));
       pn = texture2D(p0I, vUv + offset * vec2(0, pxpy.y));
       pnn = texture2D(p0I, vUv + 2.0 * offset * vec2(0, pxpy.y));
-      yparts = stencilCentralOrd2Acc4(pww.w, pw.w, p0.w, pe.w, pee.w, dy2);
+      yparts = stencilCentralOrd2Acc4(pss.w, ps.w, p0.w, pn.w, pnn.w, dy2);
     }
   }
   
