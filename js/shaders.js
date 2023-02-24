@@ -460,13 +460,15 @@ float stencilSkewOrd2Acc5(float pm4, float pm3, float pm2, float pm1, float p, f
 float computeBCsAcc4(int BCType, vec4 p, vec4 pp1, vec4 pp2, vec4 pp3, vec4 pp4, float dn, float dt, float c, float sgn) {
   float pbc = 0.0;
   if (BCType == 0) { // Open boundary condition
-    return (22.0 * p.w - 36.0 * p.z + 18.0 * p.y - 4.0 * p.x) / (3.0 * c * dt) * dn + sgn * (10.0 * p.w + 18.0 * pp1.w - 6.0 * pp2.w + pp3.w) / 3.0;
+    return -(p.w - p.z) / (c * dt) * dn + sgn * p.w;
+    // return -(22.0 * p.w - 36.0 * p.z + 18.0 * p.y - 4.0 * p.x) / (3.0 * c * dt) * dn + sgn * (10.0 * p.w + 18.0 * pp1.w - 6.0 * pp2.w + pp3.w) / 3.0;
   }
   if (BCType == 1) { // Rigid Wall
     return 0.0;
   }
   if (BCType == 2) {  // Free surface
-    return (-10.0 * p.w + 18.0 * pp1.w - 6.0 * pp2.w + pp3.w) / 3.0;
+    return 1.0 * p.w;
+    // return (-10.0 * p.w + 18.0 * pp1.w - 6.0 * pp2.w + pp3.w) / 3.0;
   }
   if (BCType == 3) { // Periodic
     return pp1.w; // up to the caller to pass the correct value here
@@ -490,6 +492,18 @@ float computeBCsAcc1(int BCType, vec4 p, vec4 pp1, float dn, float dt, float c, 
   }
 }
 
+int is_rigid_bc(vec4 wall){
+   return int(wall.w > 0.99) * int(wall.x < 0.01) * int(wall.y < 0.01) * int(wall.z < 0.01);
+}
+int is_free_bc(vec4 wall){
+  return int(wall.w > 0.99) * int(wall.x > 0.99)* int(wall.y > 0.99)* int(wall.z > 0.99);
+}
+int check_bc_type(vec4 wall, int edgeBool){
+  edgeBool += int(edgeBool == 0) * int(is_rigid_bc(wall) * 2 + is_free_bc(wall) * 3);
+  return edgeBool;
+}
+
+
 void main()	
 {
   // A few constants
@@ -510,17 +524,6 @@ void main()
   p.y = p0.z;
   p.z = p0.w;
   p.w = 0.0;
-
-  // // float timeParts = 2.0 * p0.w - p0.z; 
-  // // p.w = timeParts + dt2 * 2.0;
-  // float timeParts = (104.0 * p0.w - 114.0 * p0.z + 56.0 * p0.y - 11.0 * p0.x) / 35.0;
-  // p.w = timeParts + 12.0 * dt2  / 35.0 * 2.0;
-  // gl_FragColor = p;
-  // return;
-  // /*
-
-
-
 
   // Need this for bc and source terms
   vec3 wallRGB = texture2D(walls, vUv).xyz;
@@ -559,8 +562,6 @@ void main()
   ////// Compute the time parts
   float timeParts = 2.0 * p0.w - p0.z; 
   float timeConst = dt2c2;
-  // float timeParts = (104.0 * p0.w - 114.0 * p0.z + 56.0 * p0.y - 11.0 * p0.x) / 35.0;
-  // float timeConst = dt2c2 * 12.0 / 35.0;
   ////////// Compute the spatial derivatives //////////////
 
   ////// Figure out which boundaries we're on and the type of boundary
@@ -619,39 +620,21 @@ void main()
   vec4 wall1s = texture2D(walls, vUv - offset * vec2(0, pxpy.y));
   vec4 wall1ss = texture2D(walls, vUv - 2.0 * offset * vec2(0, pxpy.y));
  
-  
   //// East-West edges
   // West Edge
-  isRidgid = int(wall1w.w > 0.99) * int(wall1w.x < 0.01) * int(wall1w.y < 0.01) * int(wall1w.z < 0.01);
-  isFree = int(wall1w.w > 0.99) * int(wall1w.x > 0.99)* int(wall1w.y > 0.99)* int(wall1w.z > 0.99);
-  // if onWestEdge > 0, then the pixel values for wall1w is outside the texture, and we don't want to use them
-  onWestEdge += int(onWestEdge == 0) * int(isRidgid * 2 + isFree * 3);
-  isRidgid = int(wall1ww.w > 0.99) * int(wall1ww.x < 0.01) * int(wall1ww.y < 0.01) * int(wall1ww.z < 0.01);
-  isFree = int(wall1ww.w > 0.99) * int(wall1ww.x > 0.99)* int(wall1ww.y > 0.99)* int(wall1ww.z > 0.99);
-  nearWestEdge += int(nearWestEdge == 0) * (isRidgid * 2 + isFree * 3);
+  onWestEdge = check_bc_type(wall1w, onWestEdge);
+  nearWestEdge = check_bc_type(wall1ww, nearWestEdge);
   // East Edge
-  isRidgid = int(wall1e.w > 0.99) * int(wall1e.x < 0.01) * int(wall1e.y < 0.01) * int(wall1e.z < 0.01);
-  isFree = int(wall1e.w > 0.99) * int(wall1e.x > 0.99)* int(wall1e.y > 0.99)* int(wall1e.z > 0.99);  // if onWestEdge > 0, then the pixel values for wall1w is outside the texture, and we don't want to use them
-  onEastEdge += int(onEastEdge == 0) * (isRidgid * 2 + isFree * 3);
-  isRidgid = int(wall1ee.w > 0.99) * int(wall1ee.x < 0.01) * int(wall1ee.y < 0.01) * int(wall1ee.z < 0.01);
-  isFree = int(wall1ee.w > 0.99) * int(wall1ee.x > 0.99)* int(wall1ee.y > 0.99)* int(wall1ee.z > 0.99);
-  nearEastEdge += int(nearEastEdge == 0) * (isRidgid * 2 + isFree * 3);
+  onEastEdge = check_bc_type(wall1e, onEastEdge);
+  nearEastEdge = check_bc_type(wall1ee, nearEastEdge);
 
   //// North-South edges
   // South Edge (assuming bottom of texture is coordinate origin -- not true for all systems)
-  isRidgid = int(wall1s.w > 0.99) * int(wall1s.x < 0.01) * int(wall1s.y < 0.01) * int(wall1s.z < 0.01);
-  isFree = int(wall1s.w > 0.99) * int(wall1s.x > 0.99)* int(wall1s.y > 0.99)* int(wall1s.z > 0.99);
-  onSouthEdge += int(onSouthEdge == 0) * (isRidgid * 2 + isFree * 3);
-  isRidgid = int(wall1ss.w > 0.99) * int(wall1ss.x < 0.01) * int(wall1ss.y < 0.01) * int(wall1ss.z < 0.01);
-  isFree = int(wall1ss.w > 0.99) * int(wall1ss.x > 0.99)* int(wall1ss.y > 0.99)* int(wall1ss.z > 0.99);
-  nearSouthEdge += int(nearSouthEdge == 0) * (isRidgid * 2 + isFree * 3);
+  onSouthEdge = check_bc_type(wall1s, onSouthEdge);
+  nearSouthEdge = check_bc_type(wall1ss, nearSouthEdge);
   // North Edge (see assumption above)
-  isRidgid = int(wall1n.w > 0.99) * int(wall1n.x < 0.01) * int(wall1n.y < 0.01) * int(wall1n.z < 0.01);
-  isFree = int(wall1n.w > 0.99) * int(wall1n.x > 0.99)* int(wall1n.y > 0.99)* int(wall1n.z > 0.99);
-  onNorthEdge += int(onNorthEdge == 0) * (isRidgid * 2 + isFree * 3);
-  isRidgid = int(wall1nn.w > 0.99) * int(wall1nn.x < 0.01) * int(wall1nn.y < 0.01) * int(wall1nn.z < 0.01);
-  isFree = int(wall1nn.w > 0.99) * int(wall1nn.x > 0.99)* int(wall1nn.y > 0.99)* int(wall1nn.z > 0.99);
-  nearNorthEdge += int(nearNorthEdge == 0) * (isRidgid * 2 + isFree * 3);  
+  onNorthEdge = check_bc_type(wall1n, onNorthEdge);
+  nearNorthEdge = check_bc_type(wall1nn, nearNorthEdge);
 
   ////// Finally, compute the values of boundary ghost nodes and apply the appropriate 
   ////// stencils
@@ -712,29 +695,29 @@ void main()
       pwww = texture2D(p0I, vUv - 3.0 * offset * vec2(pxpy.x, 0));
       pwwww = texture2D(p0I, vUv - 4.0 * offset * vec2(pxpy.x, 0));
       pe.w = computeBCsAcc4(onEastEdge - 1, p0, pw, pww, pwww, pwwww, dx, dt, c, 1.0);
-      xparts = stencilSkewOrd2Acc5(pwwww.w, pwww.w, pww.w, pw.w, p0.w, pe.w, dx2);
+      xparts = stencilCentralOrd2Acc2(pw.w, p0.w, pe.w, dx2);
     } else if(nearEastEdge > 0) {
       pw = texture2D(p0I, vUv - offset * vec2(pxpy.x, 0));
-      pww = texture2D(p0I, vUv - 2.0 * offset * vec2(pxpy.x, 0));
-      pwww = texture2D(p0I, vUv - 3.0 * offset * vec2(pxpy.x, 0));
+      // pww = texture2D(p0I, vUv - 2.0 * offset * vec2(pxpy.x, 0));
+      // pwww = texture2D(p0I, vUv - 3.0 * offset * vec2(pxpy.x, 0));
       pe = texture2D(p0I, vUv + offset * vec2(pxpy.x, 0));
-      pee.w = computeBCsAcc4(onEastEdge - 1, pe, p0, pw, pww, pwww, dx, dt, c, 1.0);
-      xparts = stencilCentralOrd2Acc4(pww.w, pw.w, p0.w, pe.w, pee.w, dx2);
+      // pee.w = computeBCsAcc4(onEastEdge - 1, pe, p0, pw, pww, pwww, dx, dt, c, 1.0);
+      xparts = stencilCentralOrd2Acc2(pw.w, p0.w, pe.w, dx2);
     } else if (onWestEdge > 0){
       // Have to use the skewed stencil
       pe = texture2D(p0I, vUv + offset * vec2(pxpy.x, 0));
       pee = texture2D(p0I, vUv + 2.0 * offset * vec2(pxpy.x, 0));
       peee = texture2D(p0I, vUv + 3.0 * offset * vec2(pxpy.x, 0));
       peeee = texture2D(p0I, vUv + 4.0 * offset * vec2(pxpy.x, 0));
-      pw.w = computeBCsAcc4(onWestEdge - 1, p0, pe, pee, peee, peeee, dx, dt, c, -1.0);
-      xparts = stencilSkewOrd2Acc5(peeee.w, peee.w, pee.w, pe.w, p0.w, pw.w, dx2);
+      pw.w = computeBCsAcc4(onWestEdge - 1, p0, pe, pee, peee, peeee, dx, dt, c, 1.0);
+      xparts = stencilCentralOrd2Acc2(pw.w, p0.w, pe.w, dx2);
     } else if(nearWestEdge > 0) {
       pw = texture2D(p0I, vUv - offset * vec2(pxpy.x, 0));
       pe = texture2D(p0I, vUv + offset * vec2(pxpy.x, 0));
-      pee = texture2D(p0I, vUv + 2.0 * offset * vec2(pxpy.x, 0));
-      peee = texture2D(p0I, vUv + 3.0 * offset * vec2(pxpy.x, 0));
-      pww.w = computeBCsAcc4(onWestEdge - 1, pw, p0, pe, pee, peee, dx, dt, c, -1.0);
-      xparts = stencilCentralOrd2Acc4(pww.w, pw.w, p0.w, pe.w, pee.w, dx2);
+      // pee = texture2D(p0I, vUv + 2.0 * offset * vec2(pxpy.x, 0));
+      // peee = texture2D(p0I, vUv + 3.0 * offset * vec2(pxpy.x, 0));
+      // pww.w = computeBCsAcc4(onWestEdge - 1, pw, p0, pe, pee, peee, dx, dt, c, -1.0);
+      xparts = stencilCentralOrd2Acc2(pw.w, p0.w, pe.w, dx2);
     } else {
       // Not on any boundary
       pw = texture2D(p0I, vUv - offset * vec2(pxpy.x, 0));
@@ -797,29 +780,29 @@ void main()
       psss = texture2D(p0I, vUv - 3.0 * offset * vec2(0, pxpy.y));
       pssss = texture2D(p0I, vUv - 4.0 * offset * vec2(0, pxpy.y));
       pn.w = computeBCsAcc4(onNorthEdge - 1, p0, ps, pss, psss, pssss, dy, dt, c, 1.0);
-      yparts = stencilSkewOrd2Acc5(pssss.w, psss.w, pss.w, ps.w, p0.w, pn.w, dy2);
+      yparts = stencilCentralOrd2Acc2(ps.w, p0.w, pn.w, dy2);
     } else if(nearNorthEdge > 0) {
       ps = texture2D(p0I, vUv - offset * vec2(0, pxpy.y));
-      pss = texture2D(p0I, vUv - 2.0 * offset * vec2(0, pxpy.y));
-      psss = texture2D(p0I, vUv - 3.0 * offset * vec2(0, pxpy.y));
+      // pss = texture2D(p0I, vUv - 2.0 * offset * vec2(0, pxpy.y));
+      // psss = texture2D(p0I, vUv - 3.0 * offset * vec2(0, pxpy.y));
       pn = texture2D(p0I, vUv + offset * vec2(0, pxpy.y));
-      pnn.w = computeBCsAcc4(onNorthEdge - 1, pn, p0, ps, pss, psss, dy, dt, c, 1.0);
-      yparts = stencilCentralOrd2Acc4(pss.w, ps.w, p0.w, pn.w, pnn.w, dy2);
+      // pnn.w = computeBCsAcc4(onNorthEdge - 1, pn, p0, ps, pss, psss, dy, dt, c, 1.0);
+      yparts = stencilCentralOrd2Acc2(ps.w, p0.w, pn.w, dy2);
     } else if (onSouthEdge > 0){
       // Have to use the skewed stencil
       pn = texture2D(p0I, vUv + offset * vec2(0, pxpy.y));
       pnn = texture2D(p0I, vUv + 2.0 * offset * vec2(0, pxpy.y));
       pnnn = texture2D(p0I, vUv + 3.0 * offset * vec2(0, pxpy.y));
       pnnnn = texture2D(p0I, vUv + 4.0 * offset * vec2(0, pxpy.y));
-      ps.w = computeBCsAcc4(onSouthEdge - 1, p0, pn, pnn, pnnn, pnnnn, dy, dt, c, -1.0);
-      yparts = stencilSkewOrd2Acc5(pnnnn.w, pnnn.w, pnn.w, pn.w, p0.w, ps.w, dy2);
+      ps.w = computeBCsAcc4(onSouthEdge - 1, p0, pn, pnn, pnnn, pnnnn, dy, dt, c, 1.0);
+      yparts = stencilCentralOrd2Acc2(ps.w, p0.w, pn.w, dy2);
     } else if(nearSouthEdge > 0) {
       ps = texture2D(p0I, vUv - offset * vec2(0, pxpy.y));
       pn = texture2D(p0I, vUv + offset * vec2(0, pxpy.y));
-      pnn = texture2D(p0I, vUv + 2.0 * offset * vec2(0, pxpy.y));
-      pnnn = texture2D(p0I, vUv + 3.0 * offset * vec2(0, pxpy.y));
-      pss.w = computeBCsAcc4(onSouthEdge - 1, ps, p0, pn, pnn, pnnn, dy, dt, c, -1.0);
-      yparts = stencilCentralOrd2Acc4(pss.w, ps.w, p0.w, pn.w, pnn.w, dy2);
+      // pnn = texture2D(p0I, vUv + 2.0 * offset * vec2(0, pxpy.y));
+      // pnnn = texture2D(p0I, vUv + 3.0 * offset * vec2(0, pxpy.y));
+      // pss.w = computeBCsAcc4(onSouthEdge - 1, ps, p0, pn, pnn, pnnn, dy, dt, c, -1.0);
+      yparts = stencilCentralOrd2Acc2(ps.w, p0.w, pn.w, dy2);
     } else {
       // Not on any boundary
       ps = texture2D(p0I, vUv - offset * vec2(0, pxpy.y));
