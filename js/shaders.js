@@ -316,7 +316,7 @@ void main()	{
   sourceParts.z += wall.y * textSourceAmp * sourceParts.y;
   sourceParts.w += wall.y * textSourceAmp * float(wall.y > 0.05) * cos(6.283185 * (time * f + wall.z));
   vec4 absorp = dt * edgeAlpha * (p1 - p0) + absorpCoeff * dt2c2 * (p1up - p1) / (dz * dz);
-  vec4 p = timeParts + dt2c2 * (xParts + yParts + zParts) + absorp;
+  vec4 p = timeParts + dt2c2 * (xParts + yParts);// + zParts);// + absorp;
   p = p * float(sourceParts.y == 0.0) + sourceParts * float(sourceParts.y != 0.0); 
 
   gl_FragColor = p;
@@ -504,6 +504,19 @@ int check_bc_type(vec4 wall, int edgeBool){
 }
 
 
+vec4 compute_bcs(vec2 per_xy, vec2 inds_xy, int onEdge, vec4 p0, float dn, float offset){
+  vec4 thisp;
+  if (onEdge == 4){  // Periodic
+    thisp = texture2D(p0I, per_xy);
+  }
+  if (onEdge > 0) {
+    thisp.w = computeBCsAcc1(onEdge - 1, p0, thisp, dn, dt, c, 1.0);
+  } else {
+    thisp = texture2D(p0I, vUv + offset * pxpy * inds_xy);
+  }
+  return thisp;
+}
+
 void main()	
 {
   // A few constants
@@ -514,7 +527,7 @@ void main()
   float dy = dxdy.y;
   float dy2 = dy * dy;
   float dz = length(dxdy);
-  float pi = 6.283185;
+  float twopi = 6.283185;
   vec4 p = vec4(0.0, 0.0, 0.0, 0.0);  // The output pressure
   float offset = 1.0;
 
@@ -535,12 +548,12 @@ void main()
   float d = length(vUv.xy - source.xy);  // Distance from this pixel to the mouse
 
   float f = textSourceFreq * (pow(2.0, source.w) - 1.0);
-  float mouseSourceParts = textSourceAmp * source.z * sin(pi * time * f);  // Compute the source value
+  float mouseSourceParts = textSourceAmp * source.z * sin(twopi * time * f);  // Compute the source value
   mouseSourceParts = mouseSourceParts * float(d < (dz * 1.0)) * float(source.z > 0.0);  // Zero it out, if needed
   
   //// Texture source
   f = textSourceFreq * (pow(2.0, wall.x) - 1.0);
-  float sourceParts = wall.y * textSourceAmp * sin(pi * (time * f + wall.z));  // Compute the source value
+  float sourceParts = wall.y * textSourceAmp * sin(twopi * (time * f + wall.z));  // Compute the source value
   sourceParts = float(wall.y > 0.05) * sourceParts;  // Zero it out if needed
 
   //// Combine the two
@@ -554,10 +567,11 @@ void main()
     }
     if (sourceType == 1) {  // Soft source
       // substract out the source value from the previous timestep
-      sourceParts -= wall.y * textSourceAmp * sin(pi * ((time - dt) * f + wall.z));
-      sourceParts -= textSourceAmp * source.z * sin(pi * (time - dt) * f);
+      sourceParts -= wall.y * textSourceAmp * sin(twopi * ((time - dt) * f + wall.z));
+      sourceParts -= textSourceAmp * source.z * sin(twopi * (time - dt) * f);
     }
   }
+  // sourceParts = 0.0;
 
   ////// Compute the time parts
   float timeParts = 2.0 * p0.w - p0.z; 
@@ -644,28 +658,22 @@ void main()
 
   // TODO, think about corners
   //// Do the d2/dx2 derivatives
-  if (((onEastEdge > 0) || (nearEastEdge > 0)) && ((onWestEdge > 0) || (nearWestEdge > 0))) 
+  if (true)//(((onEastEdge > 0) || (nearEastEdge > 0)) && ((onWestEdge > 0) || (nearWestEdge > 0))) 
   {
+    ps = compute_bcs(vUv * vec2(0, 1) + vec2(1, 0), vec2(0, 1), onSouthEdge, p0, dy, -offset);
+    pn = compute_bcs(vUv * vec2(1, 0), vec2(0, 1), onNorthEdge, p0, dy, offset);
+    yparts = stencilCentralOrd2Acc2(ps.w, p0.w, pn.w, dy2);
+
     // we have to do 2nd order stencil with low order boundary estimation
-    // East Edge
-    if (onEastEdge == 4){  // Periodic
-      pe = texture2D(p0I, vUv * vec2(0, 1));
-    }
-    if (onEastEdge > 0) {
-      pe.w = computeBCsAcc1(onEastEdge - 1, p0, pe, dx, dt, c, 1.0);
-    } else {
-      pe = texture2D(p0I, vUv + offset * vec2(pxpy.x, 0));
-    }
-    // West edge
-    if (onWestEdge == 4){  // periodic
-      pw = texture2D(p0I, vUv * vec2(0, 1) + vec2(1, 0));
-    }
-    if (onWestEdge > 0) {
-      pw.w = computeBCsAcc1(onWestEdge - 1, p0, pw, dx, dt, c, 1.0);
-    } else {
-      pw = texture2D(p0I, vUv - offset * vec2(pxpy.x, 0));
-    }
+    pw = compute_bcs(vUv * vec2(0, 1) + vec2(1, 0), vec2(1, 0), onWestEdge, p0, dx, -offset);
+    pe = compute_bcs(vUv * vec2(0, 1), vec2(1, 0), onEastEdge, p0, dx, offset);
     xparts = stencilCentralOrd2Acc2(pw.w, p0.w, pe.w, dx2);
+
+    p.w = timeParts + timeConst * (xparts + yparts);// + sourceParts;// + absorp
+
+    gl_FragColor = p;
+    return;
+
   } else {
     // We can use higher order numerics
     // In this branch we can't be near both a west and east edge, so either one edge
@@ -729,27 +737,10 @@ void main()
   }
   
   //// Do the d2/dy2 derivatives
-  if (((onNorthEdge > 0) || (nearNorthEdge > 0)) && ((onSouthEdge > 0) || (nearSouthEdge > 0))) 
+  if (true)//(((onNorthEdge > 0) || (nearNorthEdge > 0)) && ((onSouthEdge > 0) || (nearSouthEdge > 0))) 
   {
-    // we have to do end order stencil with low order boundary estimation
-    // North Edge
-    if (onNorthEdge == 4){  // Periodic
-      pn = texture2D(p0I, vUv * vec2(1, 0));
-    }
-    if (onNorthEdge > 0) {
-      pn.w = computeBCsAcc1(onNorthEdge - 1, p0, pn, dy, dt, c, 1.0);
-    } else {
-      pn = texture2D(p0I, vUv + offset * vec2(0, pxpy.y));
-    }
-    // South edge
-    if (onSouthEdge == 4){  // periodic
-      ps = texture2D(p0I, vUv * vec2(1, 0) + vec2(0, 1));
-    }
-    if (onSouthEdge > 0) {
-      ps.w = computeBCsAcc1(onSouthEdge - 1, p0, ps, dy, dt, c, 1.0);
-    } else {
-      ps = texture2D(p0I, vUv - offset * vec2(0, pxpy.y));
-    }
+    pn = compute_bcs(vUv * vec2(1, 0), vec2(0, 1), onNorthEdge, p0, dy, offset);
+    ps = compute_bcs(vUv * vec2(0, 1) + vec2(1, 0), vec2(0, 1), onSouthEdge, p0, dy, -offset);
     yparts = stencilCentralOrd2Acc2(ps.w, p0.w, pn.w, dy2);
   } else {
     // We can use higher order numerics
