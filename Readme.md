@@ -36,12 +36,14 @@ Website: https://empeeu.github.io/sound-painter/
     * [x] Add a shift key to draw straight lines
         * Also fix the, go outside border then line ends problem;
     * [...] Go to higher order numerics
-        * ~~[ ] Switch to RK-4 integration~~
-        * [...] Go to 4th order FD for everything
+        * [x] Go to 4th order FD for ~~everything~~ space only (time is unconditionally unstable)
             * [x] Check to see if we can swap out the shader on the fly
             * [x] Make a dropdown to select the shader type
             * [x] Debug  1/4 amplitude 
-    * [...] Make an amplitude-colored shader
+            * [x] Higher order in space
+        * [ ] Switch to RK-4 integration
+        * [ ] Improve boundary conditions, esp open bc
+    * [x] Make an amplitude-colored shader
     * [ ] Implement variable sound speed
     * [ ] Create nice drawing icons and improve drawing system UX in general
         * When you click a button it should remain active
