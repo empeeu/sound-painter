@@ -550,28 +550,16 @@ void main()
   float f = textSourceFreq * (pow(2.0, source.w) - 1.0);
   float mouseSourceParts = textSourceAmp * source.z * sin(twopi * time * f);  // Compute the source value
   mouseSourceParts = mouseSourceParts * float(d < (dz * 1.0)) * float(source.z > 0.0);  // Zero it out, if needed
+  mouseSourceParts = mouseSourceParts - float(sourceType == 1) * textSourceAmp * source.z * sin(twopi * (time - dt) * f);
   
   //// Texture source
   f = textSourceFreq * (pow(2.0, wall.x) - 1.0);
   float sourceParts = wall.y * textSourceAmp * sin(twopi * (time * f + wall.z));  // Compute the source value
   sourceParts = float(wall.y > 0.05) * sourceParts;  // Zero it out if needed
+  sourceParts = sourceParts - float(sourceType == 1) * wall.y * textSourceAmp * sin(twopi * ((time - dt) * f + wall.z));
 
   //// Combine the two
-  // sourceParts += mouseSourceParts;
-  
-  if (abs(sourceParts) > 0.0){
-    if (sourceType == 0) {  // Hard source
-      p.w = sourceParts;  // value of pressure equal to the source at this point
-      gl_FragColor = p;
-      return;
-    }
-    if (sourceType == 1) {  // Soft source
-      // substract out the source value from the previous timestep
-      sourceParts -= wall.y * textSourceAmp * sin(twopi * ((time - dt) * f + wall.z));
-      sourceParts -= textSourceAmp * source.z * sin(twopi * (time - dt) * f);
-    }
-  }
-  // sourceParts = 0.0;
+  sourceParts += mouseSourceParts;
 
   ////// Compute the time parts
   float timeParts = 2.0 * p0.w - p0.z; 
@@ -601,24 +589,26 @@ void main()
   float edgeAlpha = 0.0;  // This is for extra damping at the edges
   float edgeAlphaVal = 0.04/dt;  // This is the amount of damping at the edges
 
+  float nearEdge = 4.0;
+
   //// East-West edges
   // West Edge
   onWestEdge = int(vUv.x <= pxpy.x * offset) * edgeBCType;
-  nearWestEdge = int(vUv.x <= (pxpy.x * offset * 2.0)) * edgeBCType;
+  nearWestEdge = int(vUv.x <= (pxpy.x * offset * nearEdge)) * edgeBCType;
   // cornerOffset.x = -offset * pxpy.x * onWestEdge;  // This will only be active if on the edge
   // East Edge
   onEastEdge = int(vUv.x >= (1.0 - pxpy.x * offset)) * edgeBCType;
-  nearEastEdge = int(vUv.x >= (1.0 - pxpy.x * offset * 2.0)) * edgeBCType;
+  nearEastEdge = int(vUv.x >= (1.0 - pxpy.x * offset * nearEdge)) * edgeBCType;
   // cornerOffset.x = offset * pxpy.x * onEastEdge;
 
   //// North-South edges
   // South Edge (assuming bottom of texture is coordinate origin -- not true for all systems)
   onSouthEdge = int(vUv.y <= pxpy.y * offset) * edgeBCType;
-  nearSouthEdge = int(vUv.y <= pxpy.y * offset * 2.0) * edgeBCType;
+  nearSouthEdge = int(vUv.y <= pxpy.y * offset * nearEdge) * edgeBCType;
   // cornerOffset.y = -offset * pxpy.y * onSouthEdge;
   // North Edge (see assumption above)
   onNorthEdge = int(vUv.y >= (1.0 - pxpy.y * offset)) * edgeBCType;
-  nearNorthEdge = int(vUv.y >= (1.0 - pxpy.y * offset * 2.0)) * edgeBCType;
+  nearNorthEdge = int(vUv.y >= (1.0 - pxpy.y * offset * nearEdge)) * edgeBCType;
   // cornerOffset.y = offset * pxpy.y * onNorthEdge;
   
   ////// Now do interior boundary conditions
@@ -658,163 +648,42 @@ void main()
 
   // TODO, think about corners
   //// Do the d2/dx2 derivatives
-  if (true)//(((onEastEdge > 0) || (nearEastEdge > 0)) && ((onWestEdge > 0) || (nearWestEdge > 0))) 
-  {
-    ps = compute_bcs(vUv * vec2(0, 1) + vec2(1, 0), vec2(0, 1), onSouthEdge, p0, dy, -offset);
-    pn = compute_bcs(vUv * vec2(1, 0), vec2(0, 1), onNorthEdge, p0, dy, offset);
-    yparts = stencilCentralOrd2Acc2(ps.w, p0.w, pn.w, dy2);
+  float secondOrder = float((onEastEdge > 0) || (nearEastEdge > 0) || (onWestEdge > 0) || (nearWestEdge > 0) || (onSouthEdge > 0) || (nearSouthEdge > 0) || (onNorthEdge > 0) || (nearNorthEdge > 0)); 
+  // secondOrder = 1.0;
 
-    // we have to do 2nd order stencil with low order boundary estimation
-    pw = compute_bcs(vUv * vec2(0, 1) + vec2(1, 0), vec2(1, 0), onWestEdge, p0, dx, -offset);
-    pe = compute_bcs(vUv * vec2(0, 1), vec2(1, 0), onEastEdge, p0, dx, offset);
-    xparts = stencilCentralOrd2Acc2(pw.w, p0.w, pe.w, dx2);
+  // we have to do 2nd order stencil with low order boundary estimation
+  pw = compute_bcs(vUv * vec2(0, 1) + vec2(1, 0), vec2(1, 0), onWestEdge, p0, dx, -offset);
+  pe = compute_bcs(vUv * vec2(0, 1), vec2(1, 0), onEastEdge, p0, dx, offset);
+  xparts = stencilCentralOrd2Acc2(pw.w, p0.w, pe.w, dx2);
 
-    p.w = timeParts + timeConst * (xparts + yparts);// + sourceParts;// + absorp
+  ps = compute_bcs(vUv * vec2(1, 0) + vec2(0, 1), vec2(0, 1), onSouthEdge, p0, dy, -offset);
+  pn = compute_bcs(vUv * vec2(1, 0), vec2(0, 1), onNorthEdge, p0, dy, offset);
+  yparts = stencilCentralOrd2Acc2(ps.w, p0.w, pn.w, dy2);
 
-    gl_FragColor = p;
-    return;
+  // We can use higher order numerics
+  // Not on any boundary
+  // pw = texture2D(p0I, vUv - offset * vec2(pxpy.x, 0));
+  // pe = texture2D(p0I, vUv + offset * vec2(pxpy.x, 0));
+  pww = texture2D(p0I, vUv - 2.0 * offset * vec2(pxpy.x, 0));
+  pee = texture2D(p0I, vUv + 2.0 * offset * vec2(pxpy.x, 0));
+  xparts = (1.0 - secondOrder) * stencilCentralOrd2Acc4(pww.w, pw.w, p0.w, pe.w, pee.w, dx2) + secondOrder * xparts;
 
-  } else {
-    // We can use higher order numerics
-    // In this branch we can't be near both a west and east edge, so either one edge
-    // or the other, or none
-
-    //// Grab periodic values
-    // East edge
-    if (onEastEdge == 4){  // Periodic
-      pe = texture2D(p0I, vUv * vec2(0, 1));
-      pee =  texture2D(p0I, vUv * vec2(0, 1) + vec2(pxpy.x, 0));
-    } else if (nearEastEdge == 4){ // Periodic
-          pee =  texture2D(p0I, vUv * vec2(0, 1) + vec2(pxpy.x, 0));
-    }
-    // West Edge
-    if (onWestEdge == 4){  // Periodic
-      pw = texture2D(p0I, vUv * vec2(0, 1) + vec2(1, 0));
-      pww =  texture2D(p0I, vUv * vec2(0, 1) + vec2(1.0 - pxpy.x, 0));
-    } else if (nearWestEdge == 4) {
-      pww =  texture2D(p0I, vUv * vec2(0, 1) + vec2(1.0 - pxpy.x, 0));
-    }
-    //// Compute the derivatives
-    // Both East and West in big switch statement
-    if (onEastEdge > 0){
-      // Have to use the skewed stencil
-      pw = texture2D(p0I, vUv - offset * vec2(pxpy.x, 0));
-      pww = texture2D(p0I, vUv - 2.0 * offset * vec2(pxpy.x, 0));
-      pwww = texture2D(p0I, vUv - 3.0 * offset * vec2(pxpy.x, 0));
-      pwwww = texture2D(p0I, vUv - 4.0 * offset * vec2(pxpy.x, 0));
-      pe.w = computeBCsAcc4(onEastEdge - 1, p0, pw, pww, pwww, pwwww, dx, dt, c, 1.0);
-      xparts = stencilCentralOrd2Acc2(pw.w, p0.w, pe.w, dx2);
-    } else if(nearEastEdge > 0) {
-      pw = texture2D(p0I, vUv - offset * vec2(pxpy.x, 0));
-      // pww = texture2D(p0I, vUv - 2.0 * offset * vec2(pxpy.x, 0));
-      // pwww = texture2D(p0I, vUv - 3.0 * offset * vec2(pxpy.x, 0));
-      pe = texture2D(p0I, vUv + offset * vec2(pxpy.x, 0));
-      // pee.w = computeBCsAcc4(onEastEdge - 1, pe, p0, pw, pww, pwww, dx, dt, c, 1.0);
-      xparts = stencilCentralOrd2Acc2(pw.w, p0.w, pe.w, dx2);
-    } else if (onWestEdge > 0){
-      // Have to use the skewed stencil
-      pe = texture2D(p0I, vUv + offset * vec2(pxpy.x, 0));
-      pee = texture2D(p0I, vUv + 2.0 * offset * vec2(pxpy.x, 0));
-      peee = texture2D(p0I, vUv + 3.0 * offset * vec2(pxpy.x, 0));
-      peeee = texture2D(p0I, vUv + 4.0 * offset * vec2(pxpy.x, 0));
-      pw.w = computeBCsAcc4(onWestEdge - 1, p0, pe, pee, peee, peeee, dx, dt, c, 1.0);
-      xparts = stencilCentralOrd2Acc2(pw.w, p0.w, pe.w, dx2);
-    } else if(nearWestEdge > 0) {
-      pw = texture2D(p0I, vUv - offset * vec2(pxpy.x, 0));
-      pe = texture2D(p0I, vUv + offset * vec2(pxpy.x, 0));
-      // pee = texture2D(p0I, vUv + 2.0 * offset * vec2(pxpy.x, 0));
-      // peee = texture2D(p0I, vUv + 3.0 * offset * vec2(pxpy.x, 0));
-      // pww.w = computeBCsAcc4(onWestEdge - 1, pw, p0, pe, pee, peee, dx, dt, c, -1.0);
-      xparts = stencilCentralOrd2Acc2(pw.w, p0.w, pe.w, dx2);
-    } else {
-      // Not on any boundary
-      pw = texture2D(p0I, vUv - offset * vec2(pxpy.x, 0));
-      pww = texture2D(p0I, vUv - 2.0 * offset * vec2(pxpy.x, 0));
-      pe = texture2D(p0I, vUv + offset * vec2(pxpy.x, 0));
-      pee = texture2D(p0I, vUv + 2.0 * offset * vec2(pxpy.x, 0));
-      xparts = stencilCentralOrd2Acc4(pww.w, pw.w, p0.w, pe.w, pee.w, dx2);
-    }
-  }
-  
-  //// Do the d2/dy2 derivatives
-  if (true)//(((onNorthEdge > 0) || (nearNorthEdge > 0)) && ((onSouthEdge > 0) || (nearSouthEdge > 0))) 
-  {
-    pn = compute_bcs(vUv * vec2(1, 0), vec2(0, 1), onNorthEdge, p0, dy, offset);
-    ps = compute_bcs(vUv * vec2(0, 1) + vec2(1, 0), vec2(0, 1), onSouthEdge, p0, dy, -offset);
-    yparts = stencilCentralOrd2Acc2(ps.w, p0.w, pn.w, dy2);
-  } else {
-    // We can use higher order numerics
-    // In this branch we can't be near both a north and south edge, so either one edge
-    // or the other, or none
-
-    //// Grab periodic values
-    // North edge
-    if (onNorthEdge == 4){  // Periodic
-      pn = texture2D(p0I, vUv * vec2(1, 0));
-      pnn =  texture2D(p0I, vUv * vec2(1, 0) + vec2(0, pxpy.y));
-    } else if (nearNorthEdge == 4){ // Periodic
-      pnn =  texture2D(p0I, vUv * vec2(1, 0) + vec2(0, pxpy.y));
-    }
-    // South Edge
-    if (onSouthEdge == 4){  // Periodic
-      ps = texture2D(p0I, vUv * vec2(1, 0) + vec2(0, 1));
-      pss = texture2D(p0I, vUv * vec2(1, 0) + vec2(0, 1.0 - pxpy.y));
-    } else if (nearSouthEdge == 4) {
-      pss =  texture2D(p0I, vUv * vec2(0, 1) + vec2(0, 1.0 - pxpy.y));
-    }
-    //// Compute the derivatives
-    // Both North and South in big switch statement
-    if (onNorthEdge > 0){
-      // Have to use the skewed stencil
-      ps = texture2D(p0I, vUv - offset * vec2(0, pxpy.y));
-      pss = texture2D(p0I, vUv - 2.0 * offset * vec2(0, pxpy.y));
-      psss = texture2D(p0I, vUv - 3.0 * offset * vec2(0, pxpy.y));
-      pssss = texture2D(p0I, vUv - 4.0 * offset * vec2(0, pxpy.y));
-      pn.w = computeBCsAcc4(onNorthEdge - 1, p0, ps, pss, psss, pssss, dy, dt, c, 1.0);
-      yparts = stencilCentralOrd2Acc2(ps.w, p0.w, pn.w, dy2);
-    } else if(nearNorthEdge > 0) {
-      ps = texture2D(p0I, vUv - offset * vec2(0, pxpy.y));
-      // pss = texture2D(p0I, vUv - 2.0 * offset * vec2(0, pxpy.y));
-      // psss = texture2D(p0I, vUv - 3.0 * offset * vec2(0, pxpy.y));
-      pn = texture2D(p0I, vUv + offset * vec2(0, pxpy.y));
-      // pnn.w = computeBCsAcc4(onNorthEdge - 1, pn, p0, ps, pss, psss, dy, dt, c, 1.0);
-      yparts = stencilCentralOrd2Acc2(ps.w, p0.w, pn.w, dy2);
-    } else if (onSouthEdge > 0){
-      // Have to use the skewed stencil
-      pn = texture2D(p0I, vUv + offset * vec2(0, pxpy.y));
-      pnn = texture2D(p0I, vUv + 2.0 * offset * vec2(0, pxpy.y));
-      pnnn = texture2D(p0I, vUv + 3.0 * offset * vec2(0, pxpy.y));
-      pnnnn = texture2D(p0I, vUv + 4.0 * offset * vec2(0, pxpy.y));
-      ps.w = computeBCsAcc4(onSouthEdge - 1, p0, pn, pnn, pnnn, pnnnn, dy, dt, c, 1.0);
-      yparts = stencilCentralOrd2Acc2(ps.w, p0.w, pn.w, dy2);
-    } else if(nearSouthEdge > 0) {
-      ps = texture2D(p0I, vUv - offset * vec2(0, pxpy.y));
-      pn = texture2D(p0I, vUv + offset * vec2(0, pxpy.y));
-      // pnn = texture2D(p0I, vUv + 2.0 * offset * vec2(0, pxpy.y));
-      // pnnn = texture2D(p0I, vUv + 3.0 * offset * vec2(0, pxpy.y));
-      // pss.w = computeBCsAcc4(onSouthEdge - 1, ps, p0, pn, pnn, pnnn, dy, dt, c, -1.0);
-      yparts = stencilCentralOrd2Acc2(ps.w, p0.w, pn.w, dy2);
-    } else {
-      // Not on any boundary
-      ps = texture2D(p0I, vUv - offset * vec2(0, pxpy.y));
-      pss = texture2D(p0I, vUv - 2.0 * offset * vec2(0, pxpy.y));
-      pn = texture2D(p0I, vUv + offset * vec2(0, pxpy.y));
-      pnn = texture2D(p0I, vUv + 2.0 * offset * vec2(0, pxpy.y));
-      yparts = stencilCentralOrd2Acc4(pss.w, ps.w, p0.w, pn.w, pnn.w, dy2);
-    }
-  }
-  
+  // ps = texture2D(p0I, vUv - offset * vec2(0, pxpy.y));
+  // pn = texture2D(p0I, vUv + offset * vec2(0, pxpy.y));
+  pss = texture2D(p0I, vUv - 2.0 * offset * vec2(0, pxpy.y));
+  pnn = texture2D(p0I, vUv + 2.0 * offset * vec2(0, pxpy.y));
+  yparts = (1.0 - secondOrder) * stencilCentralOrd2Acc4(pss.w, ps.w, p0.w, pn.w, pnn.w, dy2) + secondOrder * yparts;
 
   //// Compute absorption
   // Up down "edges"
   float p1up = (p0.w - dz / c / dt * (p0.w - p0.z));
   float absorp = dt * edgeAlpha * (p0.w - p0.z) + absorpCoeff * dt2c2 * 12.0 / 35.0 * (p1up - p0.w) / (dz * dz);
 
-  p.w = timeParts + timeConst * (xparts + yparts) + sourceParts;// + absorp
+  p.w = (timeParts + timeConst * (xparts + yparts) + sourceParts * float(sourceType == 1)); //  + absorp
+  p.w = p.w * float((sourceType == 0) && (abs(sourceParts) == 0.0)) + sourceParts * float((sourceType == 0) && (abs(sourceParts) != 0.0));
 
   gl_FragColor = p;
 }
-  
 `;
 
 
