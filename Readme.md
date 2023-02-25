@@ -45,9 +45,11 @@ Website: https://empeeu.github.io/sound-painter/
         * [ ] Improve boundary conditions, esp open bc
     * [x] Make an amplitude-colored shader
     * [ ] Implement variable sound speed
+    * [ ] Implement arbitrary source sound input
     * [ ] Create nice drawing icons and improve drawing system UX in general
         * When you click a button it should remain active
         * There should be drawing modes (wall, free surface, sound) and drawing tools (free hand, line, gradient)
+        * Should be able to place multiple probes and sources on the map
     * [ ] Rework the data structure
     * [ ] Set up state in JSOn format so we can reload as needed
     * ~~[ ] Start time at 0~~
